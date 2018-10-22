@@ -6,7 +6,6 @@ using XLua;
 [LuaCallCSharp]
 public class LuaHelperManager
 {
-
     protected static LuaHelperManager mInstance;
 
     protected LuaHelperManager() { }
@@ -23,7 +22,6 @@ public class LuaHelperManager
         }
     }
 
-
     /// <summary>
     /// Xlua层加载UI面板
     /// </summary>
@@ -32,16 +30,15 @@ public class LuaHelperManager
     public void LoadUI(string path, XLuaCustomExport.OnCreate OnCreate)
     {
         Debug.Log("加载UI窗体 ==" + path);
-        GameObject obj = GameObject.Instantiate(Resources.Load<GameObject>(path));
+        GameObject Canvas = GameObject.Find("Canvas");
+        GameObject obj = GameObject.Instantiate(Resources.Load<GameObject>(path)) as GameObject;
+        obj.transform.SetParent(Canvas.transform, false);
         if (OnCreate != null)
         {
-            obj.AddComponent<LuaViewBehaviour>();
+            LuaViewBehaviour luaViewBehaviour = obj.AddComponent<LuaViewBehaviour>();
             OnCreate(obj);
         }
-
     }
-
-
 }
 
 
@@ -51,7 +48,6 @@ public class LuaHelperManager
 /// </summary>
 public static class XLuaCustomExport
 {
-
     [CSharpCallLua]
     public delegate void OnCreate(GameObject obj);
 }

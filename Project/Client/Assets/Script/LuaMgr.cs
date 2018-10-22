@@ -17,7 +17,7 @@ public class LuaMgr : MonoBehaviour
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
 #if UNITY_EDITOR
-        luaFilePath = "Assets/Lua";
+        luaFilePath = "./Lua";
 #elif UNITY_ANDROID && !UNITY_EDITOR
         luaFilePath = Application.streamingAssetsPath;
 #endif
