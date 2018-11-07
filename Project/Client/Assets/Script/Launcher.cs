@@ -8,10 +8,4 @@ public class Launcher : MonoBehaviour
     {
         LuaMgr.Instance.Init();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }
