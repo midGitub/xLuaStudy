@@ -36,7 +36,7 @@ public class LuaHelperManager
         obj.transform.SetParent(Canvas.transform, false);
         if (OnCreate != null)
         {
-            LuaViewBehaviour luaViewBehaviour = obj.AddComponent<LuaViewBehaviour>();
+            obj.AddComponent<LuaViewBehaviour>();
             OnCreate(obj);
         }
     }
