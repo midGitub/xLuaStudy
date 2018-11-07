@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 1638220621
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 46cb6785695a6ae42d5c2611a8bc2c86
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/Lua/Out/UIRootView.lua.bytes
+- Assets/Lua/Out/CtrlMgr.lua.bytes
+- Assets/Lua/Out/Main.lua.bytes
+- Assets/Lua/Out/Define.lua.bytes
+- Assets/Lua/Out/CtrlNames.lua.bytes
+- Assets/Lua/Out/GameInit.lua.bytes
+- Assets/Lua/Out/UIRootCtrl.lua.bytes
+Dependencies: []

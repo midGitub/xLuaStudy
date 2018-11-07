@@ -14,7 +14,7 @@ end
 function UIRootView.Init()
     print("初始化面板  找到UI组件")
     --寻找组件
-    this.btnOpenTask = transform:FindChild("Bg/btnOpenTask"):GetComponent("UnityEngine.UI.Button")
+    this.btnOpenTask = transform:FindChild("btnOpenTask"):GetComponent("UnityEngine.UI.Button")
 
     this.btnOpenTask.onClick:AddListener(UIRootCtrl.OnBtnOpenTaskClick)
 end

@@ -31,6 +31,7 @@ public class LuaHelperManager
     {
         Debug.Log("加载UI窗体 ==" + path);
         GameObject Canvas = GameObject.Find("Canvas");
+        path = "Prefab/View/" + path;
         GameObject obj = GameObject.Instantiate(Resources.Load<GameObject>(path)) as GameObject;
         obj.transform.SetParent(Canvas.transform, false);
         if (OnCreate != null)

@@ -1,0 +1,3 @@
+CtrlNames = {
+    UIRootCtrl = "UIRootCtrl"
+}

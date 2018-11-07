@@ -17,7 +17,7 @@ public class LuaMgr : MonoBehaviour
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
 #if UNITY_EDITOR
-        luaFilePath = "./Lua";
+        luaFilePath = "Assets/Lua/";
 #elif UNITY_ANDROID && !UNITY_EDITOR
         luaFilePath = Application.streamingAssetsPath;
 #endif
@@ -33,7 +33,7 @@ public class LuaMgr : MonoBehaviour
 
     private byte[] LoadLuaFile(ref string filePath)
     {
-        string absPath = luaFilePath + "/" + filePath + ".lua";
+        string absPath = luaFilePath + filePath + ".lua";
         return System.Text.Encoding.UTF8.GetBytes(File.ReadAllText(absPath));
     }
 

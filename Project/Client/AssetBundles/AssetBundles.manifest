@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 1269244277
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: view/uirootview.prefab.unity3d
+      Dependencies: {}
+    Info_1:
+      Name: lua
+      Dependencies: {}
