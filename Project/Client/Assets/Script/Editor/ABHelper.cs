@@ -7,26 +7,30 @@ using UnityEngine;
 
 public static class ABHelper
 {
-    [MenuItem("ABHelper/SetBundleName", false, 0)]
-    public static void SetBundleNameAll()
-    {
-        SetViewPrefabName();
-    }
+    private static string localPath = "AssetBundle/";
+    private static string servicePath = "D:/LocalServer/AssetBundle/";
 
-    [MenuItem("ABHelper/BuildAssetBundle", false, 1)]
-    public static void BuildAssetBundle()
+    [MenuItem("ABHelper/BuildAssetBundle", false, 0)]
+    public static void BuildAssetBundleLocal()
     {
-        string dir = "AssetBundles";
+        SetBundleNameAll();
+
+        string dir = CheckPathExistence(servicePath);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
         }
-        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows64);
-
+        BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
+        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
     }
 
-
     #region 设置AssetBundleName
+    public static void SetBundleNameAll()
+    {
+        SetViewPrefabName();
+        SetLuaBundleName();
+    }
+
     public static void SetViewPrefabName()
     {
         //Prefab
@@ -74,14 +78,9 @@ public static class ABHelper
         EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
     }
-    #endregion
 
-    #region Build各种资源的AssetBundle
-    [MenuItem("ABHelper/BuildLuaAssetBundle", false, 1)]
-    public static void BuildLuaAssetBundle()
+    public static void SetLuaBundleName()
     {
-        BuildAssetBundleOptions options = BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets | BuildAssetBundleOptions.DeterministicAssetBundle;
-
         /// 清零掉这个 目录下的 * .bytes 文件 方便重新生成
         string[] files = Directory.GetFiles("Assets/Lua/Out", "*.lua.bytes");
 
@@ -100,41 +99,36 @@ public static class ABHelper
             FileUtil.CopyFileOrDirectory(files[i], "Assets/Lua/Out/" + fname + ".bytes");
         }
 
-        AssetDatabase.Refresh();
-
         //use list to collect files whith *.bytes format 
         files = Directory.GetFiles("Assets/Lua/Out", "*.lua.bytes");
-        List<AssetBundleBuild> builds = new List<AssetBundleBuild>();
+
         for (int i = 0; i < files.Length; i++)
         {
-            UnityEngine.Object obj = AssetDatabase.LoadMainAssetAtPath(files[i]);
-            AssetBundleBuild item = new AssetBundleBuild();
-            item.assetBundleName = "lua";
-            item.assetNames = new string[] { AssetDatabase.GetAssetPath(obj) };
-            item.assetBundleVariant = "bytes";
-            builds.Add(item);
-        }
-
-        ///buildpipeline with list 
-        if (files.Length > 0)
-        {
-            string outPath = "AssetBundles/lua/";
-            AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(outPath, builds.ToArray(), options, BuildTarget.StandaloneWindows64);
-            AssetDatabase.Refresh();
-
-            if (manifest != null)
+            AssetImporter importer = AssetImporter.GetAtPath(files[i]);
+            if (importer != null)
             {
-                Debug.Log("Lua脚本打包成功");
+                importer.assetBundleName = "lua/lua";
             }
-            else
+
+            if (EditorUtility.DisplayCancelableProgressBar("SetBundleName", "LuaBundleName --> Lua", (float)i / files.Length))
             {
-                Debug.Log("Lua脚本打包失败");
+                EditorUtility.ClearProgressBar();
+                return;
             }
         }
-        else
-        {
-            Debug.Log("读取不到任何Lua文件");
-        }
+
+        EditorUtility.ClearProgressBar();
+        AssetDatabase.Refresh();
     }
+
     #endregion
+    public static string CheckPathExistence(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        AssetDatabase.Refresh();
+        return path;
+    }
 }

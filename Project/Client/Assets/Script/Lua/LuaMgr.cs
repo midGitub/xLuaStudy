@@ -12,7 +12,6 @@ public class LuaMgr : MonoBehaviour
     private string luaFilePath;
     private void Awake()
     {
-        DontDestroyOnLoad(this);
         Instance = this;
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
