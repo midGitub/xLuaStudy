@@ -31,6 +31,6 @@ end
 
 -- 按钮点击的方法
 function UIRootCtrl.OnBtnOpenTaskClick()
-    print("点击事件")
+    print("点击事件(热更)")
 end
 ---------------------

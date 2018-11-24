@@ -32,8 +32,6 @@ public class LoadAssetBundle : MonoBehaviour
 
     }
 
-
-
     //不同平台下StreamingAssets的路径设置
     public static readonly string PathURL =
 #if UNITY_ANDROID
@@ -61,9 +59,9 @@ public class LoadAssetBundle : MonoBehaviour
     /// <param name="RootAssetsName"></param>
     /// <param name="AssetName"></param>
     /// <param name="savePath"></param>
-    public void DownLoadAssets2LocalWithDependencies(string AssetsHost, string RootAssetsName, string AssetName, string savePath, dlg_OnAssetBundleDownLoadOver OnDownloadOver = null)
+    public void DownLoadAssetsToLocalWithDependencies(string AssetsHost, string RootAssetsName, string AssetName, string savePath, dlg_OnAssetBundleDownLoadOver OnDownloadOver = null)
     {
-        StartCoroutine(DownLoadAssetsWithDependencies2Local(AssetsHost, RootAssetsName, AssetName, savePath, OnDownloadOver));
+        StartCoroutine(DownLoadAssetsWithDependenciesToLocal(AssetsHost, RootAssetsName, AssetName, savePath, OnDownloadOver));
     }
 
     /// <summary>
@@ -74,7 +72,7 @@ public class LoadAssetBundle : MonoBehaviour
     /// <param name="AssetName">请求资源名称</param>
     /// <param name="saveLocalPath">保存到本地路径,一般存在Application.persistentDataPath</param>
     /// <returns></returns>
-    IEnumerator DownLoadAssetsWithDependencies2Local(string AssetsHost, string RootAssetsName, string AssetName, string saveLocalPath, dlg_OnAssetBundleDownLoadOver OnDownloadOver = null)
+    IEnumerator DownLoadAssetsWithDependenciesToLocal(string AssetsHost, string RootAssetsName, string AssetName, string saveLocalPath, dlg_OnAssetBundleDownLoadOver OnDownloadOver = null)
     {
         WWW ServerManifestWWW = null;        //用于存储依赖关系的 AssetBundle
         AssetBundle LocalManifestAssetBundle = null;    //用于存储依赖关系的 AssetBundle
@@ -153,7 +151,6 @@ public class LoadAssetBundle : MonoBehaviour
             }
             //保存到本地
             SaveAsset2LocalFile(saveLocalPath, item.Key, wwwAsset.bytes, wwwAsset.bytes.Length);
-
         }
 
         if (LocalManifestAssetBundle != null)
@@ -227,6 +224,29 @@ public class LoadAssetBundle : MonoBehaviour
         Debug.LogError(LocalPath + "/" + AssetName);
         AssetBundle assetTarget = AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
         return assetTarget.LoadAsset<GameObject>(PrefabName);
+    }
+
+    /// <summary>
+    /// 非递归式加载指定AB,并加载依赖项,并返回目标GameObject
+    /// </summary>
+    /// <param name="RootAssetsName"></param>
+    /// <param name="AssetName"></param>
+    /// <param name="LocalPath"></param>
+    public AssetBundle GetLoadAssetFromLocalFileLua(string RootAssetsName, string AssetName, string PrefabName, string LocalPath)
+    {
+        Debug.LogError(LocalPath + "/" + RootAssetsName);
+        AssetBundle assetBundle = AssetBundle.LoadFromFile(LocalPath + "/" + RootAssetsName);
+        AssetBundleManifest assetBundleManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+        string[] AllDependencies = assetBundleManifest.GetAllDependencies(AssetName);
+
+        for (int i = AllDependencies.Length - 1; i >= 0; i--)
+        {
+            AssetBundle assetBundleDependencies = AssetBundle.LoadFromFile(LocalPath + "/" + AllDependencies[i]);
+            assetBundleDependencies.LoadAllAssets();
+        }
+        Debug.LogError(LocalPath + "/" + AssetName);
+        return AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
     }
 
     /// <summary>

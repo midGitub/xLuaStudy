@@ -16,9 +16,10 @@ public class LuaManager : Manager
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
 #if UNITY_EDITOR
-        luaFilePath = "Assets/Lua/";
+        //luaFilePath = "Assets/Lua/";
+        luaFilePath = Application.persistentDataPath + "/lua/";
 #elif UNITY_ANDROID && !UNITY_EDITOR
-        luaFilePath = Application.streamingAssetsPath;
+         luaFilePath = Application.persistentDataPath + "/lua/";
 #endif
     }
 

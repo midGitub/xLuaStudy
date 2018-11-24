@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class Launcher : MonoBehaviour
 {
@@ -28,28 +31,96 @@ public class Launcher : MonoBehaviour
         string savePath = Application.persistentDataPath;
 
         string serverPath = string.Empty;
-
+        string rootAssetName = string.Empty;
 #if UNITY_EDITOR
         serverPath = "http://192.168.1.175/AssetBundleEditor";
+        rootAssetName = "AssetBundleEditor";
 #elif !UNITY_EDITOR && UNITY_ANDROID
         serverPath = "http://192.168.1.175/AssetBundleAndroid";
+          rootAssetName = "AssetBundleAndroid";
 #endif
 
-        LoadAssetBundle.Instance.DownLoadAssets2LocalWithDependencies(serverPath, "AssetBundleEditor", "view/uirootview.prefab.unity3d", savePath, () =>
+        //LoadAssetBundle.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, "AssetBundleEditor", "view/uirootview.prefab.unity3d", savePath, () =>
+        //{
+        //    GameObject obj = LoadAssetBundle.Instance.GetLoadAssetFromLocalFile("AssetBundleEditor", "view/uirootview.prefab.unity3d", "uirootview.prefab", Application.persistentDataPath);
+        //    GameObject view = GameObject.Instantiate(obj);
+        //    view.transform.SetParent(canvas.transform, false);
+        //});
+
+        //GameObject luaMgrObj = new GameObject();
+        //luaMgrObj.name = "LuaManager";
+        //luaMgrObj.transform.SetParent(managerGroupObj.transform);
+        //LuaManager luaManager = luaMgrObj.AddComponent<LuaManager>();
+        //luaManager.Init();
+
+        LoadAssetBundle.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/lua", savePath, () =>
         {
-            GameObject obj = LoadAssetBundle.Instance.GetLoadAssetFromLocalFile("AssetBundleEditor", "view/uirootview.prefab.unity3d", "uirootview.prefab", Application.persistentDataPath);
-            GameObject view = GameObject.Instantiate(obj);
-            view.transform.SetParent(canvas.transform, false);
+            AssetBundle ab = LoadAssetBundle.Instance.GetLoadAssetFromLocalFileLua(rootAssetName, "lua/lua", "lua", Application.persistentDataPath);
+
+
+
+            AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
+
+
+            for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
+            {
+                //assetBundleRequest.allAssets[i].
+
+                Stream sw = null;
+                FileInfo fileInfo = new FileInfo(savePath + "/lua/" + assetBundleRequest.allAssets[i].name);
+                if (fileInfo.Exists)
+                {
+                    fileInfo.Delete();
+                }
+                CheckPath(fileInfo.Directory.FullName);
+                //如果此文件不存在则创建
+                sw = fileInfo.Create();
+                //写入
+                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
+                sw.Write(byteArray, 0, byteArray.Length);
+
+                sw.Flush();
+                //关闭流
+                sw.Close();
+                //销毁流
+                sw.Dispose();
+
+                Debug.Log(name + "成功保存到本地~");
+            }
+
+            GameObject luaMgrObj = new GameObject();
+            luaMgrObj.name = "LuaManager";
+            luaMgrObj.transform.SetParent(managerGroupObj.transform);
+            LuaManager luaManager = luaMgrObj.AddComponent<LuaManager>();
+            luaManager.Init();
+
+
         });
-
     }
+
+    public void CheckPath(string path)
+    {
+        string[] s = path.Split('\\');
+        path = path.Replace('\\', '/');
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+    }
+
+    /// <summary> 
+    /// 将一个object对象序列化，返回一个byte[]         
+    /// </summary> 
+    /// <param name="obj">能序列化的对象</param>         
+    /// <returns></returns> 
+    public static byte[] ObjectToBytes(object obj)
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            IFormatter formatter = new BinaryFormatter();
+            formatter.Serialize(ms, obj);
+            return ms.GetBuffer();
+        }
+    }
+
 }
-// Use this for initialization
-
-//5.0版本打包时候选中需要打包的东西然后设置右下角名称,同个/设置多集目录,后面的框标记后缀(后缀不重要)
-//打包时候的目标文件夹,假设目标文件夹名称为"WJJ",那么会生成"WJJ"和"WJJ.manifest"两个文件
-//其中WJJ.manifest文件没有用,只是用来看的,WJJ是一个assetbundle包,里面包含了整个文件夹的依赖信息
-//可以先加载这个东西,然后获取到依赖关系后逐步加载
-
-
-
