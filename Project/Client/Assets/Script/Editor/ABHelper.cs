@@ -8,20 +8,34 @@ using UnityEngine;
 public static class ABHelper
 {
     private static string localPath = "AssetBundle/";
-    private static string servicePath = "D:/LocalServer/AssetBundle/";
-
+    private static string servicePathEditor = "D:/LocalServer/AssetBundleEditor/";
+    private static string servicePathAndroid = "D:/LocalServer/AssetBundleAndroid/";
     [MenuItem("ABHelper/BuildAssetBundle", false, 0)]
     public static void BuildAssetBundleLocal()
     {
         SetBundleNameAll();
 
-        string dir = CheckPathExistence(servicePath);
+        string dir = CheckPathExistence(servicePathEditor);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
         }
         BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
+    }
+
+    [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 0)]
+    public static void BuildAssetBundleLocalAndroid()
+    {
+        SetBundleNameAll();
+
+        string dir = CheckPathExistence(servicePathAndroid);
+        if (Directory.Exists(dir) == false)
+        {
+            Directory.CreateDirectory(dir);
+        }
+        BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
+        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.Android);
     }
 
     #region 设置AssetBundleName

@@ -30,7 +30,7 @@ public class LuaViewBehaviour : MonoBehaviour
     private void Awake()
     {
         //获取全局的Lua环境变量
-        luaEnv = LuaMgr.luaEnv;
+        luaEnv = LuaManager.luaEnv;
 
         scriptEnv = luaEnv.NewTable();
 

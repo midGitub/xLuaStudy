@@ -2,9 +2,9 @@
 using UnityEngine;
 using XLua;
 
-public class LuaMgr : MonoBehaviour
+public class LuaManager : Manager
 {
-    public static LuaMgr Instance;
+    public static LuaManager Instance;
     public static LuaEnv luaEnv;
     /// <summary>
     /// lua文件保存地址
@@ -12,7 +12,7 @@ public class LuaMgr : MonoBehaviour
     private string luaFilePath;
     private void Awake()
     {
-        Instance = this;
+        base.Awake();
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
 #if UNITY_EDITOR
