@@ -8,30 +8,8 @@ public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
 /// 加载AssetBundle
 /// </summary>
-public class LoadAssetBundle : MonoBehaviour
+public class AssetBundleManager : BaseManager
 {
-    private static LoadAssetBundle _instance;
-    public static LoadAssetBundle Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                GameObject g = new GameObject();
-                g.name = "LoadAssetBundle";
-                LoadAssetBundle loadAssetBundle = g.AddComponent<LoadAssetBundle>();
-                _instance = loadAssetBundle;
-            }
-
-            return _instance;
-        }
-    }
-
-    private void Awake()
-    {
-
-    }
-
     //不同平台下StreamingAssets的路径设置
     public static readonly string PathURL =
 #if UNITY_ANDROID
@@ -203,36 +181,12 @@ public class LoadAssetBundle : MonoBehaviour
     }
 
     /// <summary>
-    /// 非递归式加载指定AB,并加载依赖项,并返回目标GameObject
+    /// 非递归式加载指定AB,并加载依赖项,并返回目标AssetBundle
     /// </summary>
     /// <param name="RootAssetsName"></param>
     /// <param name="AssetName"></param>
     /// <param name="LocalPath"></param>
-    public GameObject GetLoadAssetFromLocalFile(string RootAssetsName, string AssetName, string PrefabName, string LocalPath)
-    {
-        Debug.LogError(LocalPath + "/" + RootAssetsName);
-        AssetBundle assetBundle = AssetBundle.LoadFromFile(LocalPath + "/" + RootAssetsName);
-        AssetBundleManifest assetBundleManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-        string[] AllDependencies = assetBundleManifest.GetAllDependencies(AssetName);
-
-        for (int i = AllDependencies.Length - 1; i >= 0; i--)
-        {
-            AssetBundle assetBundleDependencies = AssetBundle.LoadFromFile(LocalPath + "/" + AllDependencies[i]);
-            assetBundleDependencies.LoadAllAssets();
-        }
-        Debug.LogError(LocalPath + "/" + AssetName);
-        AssetBundle assetTarget = AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
-        return assetTarget.LoadAsset<GameObject>(PrefabName);
-    }
-
-    /// <summary>
-    /// 非递归式加载指定AB,并加载依赖项,并返回目标GameObject
-    /// </summary>
-    /// <param name="RootAssetsName"></param>
-    /// <param name="AssetName"></param>
-    /// <param name="LocalPath"></param>
-    public AssetBundle GetLoadAssetFromLocalFileLua(string RootAssetsName, string AssetName, string PrefabName, string LocalPath)
+    public AssetBundle GetLoadAssetFromLocalFile(string RootAssetsName, string AssetName, string PrefabName, string LocalPath)
     {
         Debug.LogError(LocalPath + "/" + RootAssetsName);
         AssetBundle assetBundle = AssetBundle.LoadFromFile(LocalPath + "/" + RootAssetsName);

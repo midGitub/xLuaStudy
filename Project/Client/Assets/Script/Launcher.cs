@@ -39,26 +39,10 @@ public class Launcher : MonoBehaviour
         serverPath = "http://192.168.1.175/AssetBundleAndroid";
           rootAssetName = "AssetBundleAndroid";
 #endif
-
-        //LoadAssetBundle.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, "AssetBundleEditor", "view/uirootview.prefab.unity3d", savePath, () =>
-        //{
-        //    GameObject obj = LoadAssetBundle.Instance.GetLoadAssetFromLocalFile("AssetBundleEditor", "view/uirootview.prefab.unity3d", "uirootview.prefab", Application.persistentDataPath);
-        //    GameObject view = GameObject.Instantiate(obj);
-        //    view.transform.SetParent(canvas.transform, false);
-        //});
-
-        //GameObject luaMgrObj = new GameObject();
-        //luaMgrObj.name = "LuaManager";
-        //luaMgrObj.transform.SetParent(managerGroupObj.transform);
-        //LuaManager luaManager = luaMgrObj.AddComponent<LuaManager>();
-        //luaManager.Init();
-
-        LoadAssetBundle.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/lua", savePath, () =>
+        AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/lua", savePath, () =>
         {
-            AssetBundle ab = LoadAssetBundle.Instance.GetLoadAssetFromLocalFileLua(rootAssetName, "lua/lua", "lua", Application.persistentDataPath);
-
-
-
+            AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/lua", "lua", Application.persistentDataPath);
+            
             AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
 
 
@@ -84,8 +68,6 @@ public class Launcher : MonoBehaviour
                 sw.Close();
                 //销毁流
                 sw.Dispose();
-
-                Debug.Log(name + "成功保存到本地~");
             }
 
             GameObject luaMgrObj = new GameObject();
@@ -93,8 +75,6 @@ public class Launcher : MonoBehaviour
             luaMgrObj.transform.SetParent(managerGroupObj.transform);
             LuaManager luaManager = luaMgrObj.AddComponent<LuaManager>();
             luaManager.Init();
-
-
         });
     }
 

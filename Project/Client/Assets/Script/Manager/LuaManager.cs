@@ -2,15 +2,14 @@
 using UnityEngine;
 using XLua;
 
-public class LuaManager : Manager
+public class LuaManager : BaseManager
 {
-    public static LuaManager Instance;
     public static LuaEnv luaEnv;
     /// <summary>
     /// lua文件保存地址
     /// </summary>
     private string luaFilePath;
-    private void Awake()
+    protected override void Awake()
     {
         base.Awake();
         luaEnv = new LuaEnv();
