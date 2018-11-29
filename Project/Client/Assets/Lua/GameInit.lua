@@ -6,14 +6,14 @@ local this = GameInit
 
 -- 将View的脚本一一注册进去
 function GameInit.InitViews()
-        require("UIRootView")
+        require("UIStartView")
 end
 
 --初始化方法 ctrl 和 view 同时加载root界面
 function GameInit.Init()
     this.InitViews()
     CtrlMgr.Init()
-    GameInit.loadView(CtrlNames.UIRootCtrl)
+    GameInit.loadView(CtrlNames.UIStartCtrl)
 end
 
 --从控制器中拿出一个来调用它的Awake方法 加载窗体--

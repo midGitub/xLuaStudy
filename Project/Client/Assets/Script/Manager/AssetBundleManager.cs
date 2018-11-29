@@ -8,8 +8,36 @@ public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
 /// 加载AssetBundle
 /// </summary>
-public class AssetBundleManager : BaseManager
+public class AssetBundleManager : MonoBehaviour
 {
+    private static AssetBundleManager instance;
+
+    public static AssetBundleManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject managerGroup = GameObject.Find("ManagerGroup");
+                if (managerGroup == null)
+                {
+                    managerGroup = new GameObject();
+                    managerGroup.name = "ManagerGroup";
+                }
+
+                instance = managerGroup.GetComponentInChildren<AssetBundleManager>();
+                if (instance == null)
+                {
+                    GameObject go = new GameObject();
+                    go.transform.parent = managerGroup.transform;
+                    go.name = typeof(AssetBundleManager).Name;
+                    instance = go.AddComponent<AssetBundleManager>();
+                }
+            }
+            return instance;
+        }
+    }
+
     //不同平台下StreamingAssets的路径设置
     public static readonly string PathURL =
 #if UNITY_ANDROID
@@ -188,7 +216,6 @@ public class AssetBundleManager : BaseManager
     /// <param name="LocalPath"></param>
     public AssetBundle GetLoadAssetFromLocalFile(string RootAssetsName, string AssetName, string PrefabName, string LocalPath)
     {
-        Debug.LogError(LocalPath + "/" + RootAssetsName);
         AssetBundle assetBundle = AssetBundle.LoadFromFile(LocalPath + "/" + RootAssetsName);
         AssetBundleManifest assetBundleManifest = assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
 
@@ -199,7 +226,6 @@ public class AssetBundleManager : BaseManager
             AssetBundle assetBundleDependencies = AssetBundle.LoadFromFile(LocalPath + "/" + AllDependencies[i]);
             assetBundleDependencies.LoadAllAssets();
         }
-        Debug.LogError(LocalPath + "/" + AssetName);
         return AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
     }
 

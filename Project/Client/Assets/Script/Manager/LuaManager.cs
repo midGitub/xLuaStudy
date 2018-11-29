@@ -2,21 +2,56 @@
 using UnityEngine;
 using XLua;
 
-public class LuaManager : BaseManager
+public class LuaManager : MonoBehaviour
 {
+
+    private static LuaManager instance;
+
+    public static LuaManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject managerGroup = GameObject.Find("ManagerGroup");
+                if (managerGroup == null)
+                {
+                    managerGroup = new GameObject();
+                    managerGroup.name = "ManagerGroup";
+                }
+
+                instance = managerGroup.GetComponentInChildren<LuaManager>();
+                if (instance == null)
+                {
+                    GameObject go = new GameObject();
+                    go.transform.parent = managerGroup.transform;
+                    go.name = typeof(LuaManager).Name;
+                    instance = go.AddComponent<LuaManager>();
+                }
+            }
+            return instance;
+        }
+    }
+
+
     public static LuaEnv luaEnv;
     /// <summary>
     /// lua文件保存地址
     /// </summary>
     private string luaFilePath;
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         luaEnv = new LuaEnv();
         luaEnv.AddLoader(LoadLuaFile);
 #if UNITY_EDITOR
-        //luaFilePath = "Assets/Lua/";
-        luaFilePath = Application.persistentDataPath + "/lua/";
+        if (GameSetting.Instance.patcher == true)//判断是否走热更AB逻辑
+        {
+            luaFilePath = Application.persistentDataPath + "/lua/";
+        }
+        else
+        {
+            luaFilePath = "Assets/Lua/";
+        }
 #elif UNITY_ANDROID && !UNITY_EDITOR
          luaFilePath = Application.persistentDataPath + "/lua/";
 #endif

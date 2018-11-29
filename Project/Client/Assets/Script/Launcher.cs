@@ -10,22 +10,15 @@ public class Launcher : MonoBehaviour
 {
     private GameObject managerGroupObj;
 
-    private List<BaseManager> managerList = new List<BaseManager>();
 
-    private void Awake()
-    {
-        managerGroupObj = GameObject.Find("ManagerGroup");
-        DontDestroyOnLoad(managerGroupObj);
-    }
 
     private void Start()
     {
-        //GameObject luaMgrObj = new GameObject();
-        //luaMgrObj.name = "LuaManager";
-        //luaMgrObj.transform.SetParent(managerGroupObj.transform);
-        //luaMgrObj.AddComponent<LuaManager>();
-        //LuaManager.Instance.Init();
 
+    }
+
+    private void Awake()
+    {
         GameObject canvas = GameObject.Find("Canvas");
 
         string savePath = Application.persistentDataPath;
@@ -42,10 +35,9 @@ public class Launcher : MonoBehaviour
         AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/lua", savePath, () =>
         {
             AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/lua", "lua", Application.persistentDataPath);
-            
+
             AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
-
-
+            
             for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
             {
                 //assetBundleRequest.allAssets[i].
@@ -69,13 +61,17 @@ public class Launcher : MonoBehaviour
                 //销毁流
                 sw.Dispose();
             }
-
-            GameObject luaMgrObj = new GameObject();
-            luaMgrObj.name = "LuaManager";
-            luaMgrObj.transform.SetParent(managerGroupObj.transform);
-            LuaManager luaManager = luaMgrObj.AddComponent<LuaManager>();
-            luaManager.Init();
         });
+
+        LuaManager.Instance.Init();
+    }
+
+
+
+
+    public void Update()
+    {
+
     }
 
     public void CheckPath(string path)
@@ -103,4 +99,12 @@ public class Launcher : MonoBehaviour
         }
     }
 
+}
+
+public class aaa
+{
+    public static void bbb()
+    {
+        GameObject a = AssetBundleManager.Instance.gameObject;
+    }
 }

@@ -71,7 +71,13 @@ public class LuaViewBehaviour : MonoBehaviour
         }
     }
 
-
+    private void Update()
+    {
+        if (luaUpdate != null)
+        {
+            luaUpdate();
+        }
+    }
 
 
     private void OnDestroy()

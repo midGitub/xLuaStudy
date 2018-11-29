@@ -11,7 +11,7 @@ public static class ABHelper
     private static string servicePathEditor = "D:/LocalServer/AssetBundleEditor/";
     private static string servicePathAndroid = "D:/LocalServer/AssetBundleAndroid/";
     [MenuItem("ABHelper/BuildAssetBundle", false, 0)]
-    public static void BuildAssetBundleLocal()
+    public static void BuildAssetBundleEditor()
     {
         SetBundleNameAll();
 
@@ -24,7 +24,7 @@ public static class ABHelper
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
     }
 
-    [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 0)]
+    [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]
     public static void BuildAssetBundleLocalAndroid()
     {
         SetBundleNameAll();
@@ -36,6 +36,8 @@ public static class ABHelper
         }
         BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.Android);
+
+
     }
 
     #region 设置AssetBundleName

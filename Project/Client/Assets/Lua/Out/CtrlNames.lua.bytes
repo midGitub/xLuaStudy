@@ -1,3 +1,3 @@
 CtrlNames = {
-    UIRootCtrl = "UIRootCtrl"
+    UIStartCtrl = "UIStartCtrl"
 }
