@@ -100,11 +100,3 @@ public class Launcher : MonoBehaviour
     }
 
 }
-
-public class aaa
-{
-    public static void bbb()
-    {
-        GameObject a = AssetBundleManager.Instance.gameObject;
-    }
-}

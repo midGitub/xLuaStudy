@@ -82,7 +82,6 @@ public class LuaViewBehaviour : MonoBehaviour
 
     private void OnDestroy()
     {
-        Debug.LogError(gameObject.name+"  destroy");
         if (luaOnDestroy != null)
         {
             luaOnDestroy();

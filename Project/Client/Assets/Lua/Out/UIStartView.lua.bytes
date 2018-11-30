@@ -21,11 +21,11 @@ function UIStartView.Start()
 end
 
 function UIStartView.Update()
-    print("UIStartView.Update()")
 end
 
 function UIStartView.OnDestroy()
     this.startButton.onClick = null
+    this.startButton = null;
     print("UIStartView.OnDestroy()")
 end
 
