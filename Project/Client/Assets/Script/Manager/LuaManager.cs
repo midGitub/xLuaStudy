@@ -4,7 +4,7 @@ using XLua;
 
 public class LuaManager : MonoBehaviour
 {
-   
+
     private static LuaManager instance;
 
     public static LuaManager Instance
@@ -73,12 +73,6 @@ public class LuaManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        luaEnv.Dispose();
-    }
-
-    public void DisPose()
-    {
-        Debug.LogError("dispose");
         luaEnv.Dispose();
     }
 }

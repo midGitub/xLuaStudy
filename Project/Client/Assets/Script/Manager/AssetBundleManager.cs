@@ -97,6 +97,7 @@ public class AssetBundleManager : MonoBehaviour
             {
                 //加载总的配置文件
                 assetBundleManifestServer = ServerManifestWWW.assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+              string[] s =  assetBundleManifestServer.GetAllAssetBundles();
                 Debug.Log("___当前请求总依赖文件~\n");
             }
             else

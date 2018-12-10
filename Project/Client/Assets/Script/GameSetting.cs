@@ -20,6 +20,8 @@ public class GameSetting : ScriptableObject
             _instance = value;
         }
     }
+
     public bool patcher;
+    public int versionCode;
 }
 
