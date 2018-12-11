@@ -330,11 +330,11 @@ public class Helper
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    public static VersionJsonObject LoadVersionJson(string path)
+    public static VersionJsonObject LoadVersionJson(string data)
     {
         VersionJsonObject versionJsonObject = new VersionJsonObject();
 
-        JsonData jsonData = JsonMapper.ToObject(File.ReadAllText(path));
+        JsonData jsonData = JsonMapper.ToObject(data);
         versionJsonObject.version = uint.Parse(jsonData["VersionCode"].ToString());
 
         int count = jsonData["ABHashList"].Count;

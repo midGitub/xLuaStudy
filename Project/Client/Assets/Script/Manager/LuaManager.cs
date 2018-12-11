@@ -67,8 +67,25 @@ public class LuaManager : MonoBehaviour
 
     private byte[] LoadLuaFile(ref string filePath)
     {
-        string absPath = luaFilePath + filePath + ".lua";
-        return System.Text.Encoding.UTF8.GetBytes(File.ReadAllText(absPath));
+        byte[] byteArray = null;
+
+        string[] allLuaPaths = Helper.GetFiles(luaFilePath, null, true);
+
+        for (int i = 0; i < allLuaPaths.Length; i++)
+        {
+            allLuaPaths[i] = allLuaPaths[i].ToLower();
+            if (!allLuaPaths[i].Contains("meta"))
+            {
+                if (allLuaPaths[i].Contains(filePath))
+                {
+                    byteArray = System.Text.Encoding.UTF8.GetBytes(File.ReadAllText(allLuaPaths[i]));
+                    break;
+                }
+            }
+        }
+
+        //string absPath = luaFilePath + filePath + ".lua";
+        return byteArray;
     }
 
     private void OnDestroy()

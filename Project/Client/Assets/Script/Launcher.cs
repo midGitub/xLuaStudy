@@ -32,38 +32,65 @@ public class Launcher : MonoBehaviour
         serverPath = "http://192.168.1.175/AssetBundleAndroid";
           rootAssetName = "AssetBundleAndroid";
 #endif
-        AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/lua", savePath, () =>
+        //AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/Base", savePath, () =>
+        //{
+        //    AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/Base", "lua", Application.persistentDataPath);
+
+        //    AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
+
+        //    for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
+        //    {
+        //        byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
+        //        Helper.SaveAssetToLocalFile(savePath + "/lua/", assetBundleRequest.allAssets[i].name, byteArray, byteArray.Length);
+        //    }
+        //});
+
+        //AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/View", savePath, () =>
+        //{
+        //    AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/View", "lua", Application.persistentDataPath);
+
+        //    AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
+
+        //    for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
+        //    {
+        //        byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
+        //        Helper.SaveAssetToLocalFile(savePath + "/lua/", assetBundleRequest.allAssets[i].name, byteArray, byteArray.Length);
+        //    }
+        //});
+
+        //LuaManager.Instance.Init();
+
+        string url = serverPath + "/version.json";
+
+        NetWorkManager.Instance.Download(url, (string content) =>
         {
-            AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/lua", "lua", Application.persistentDataPath);
-
-            AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
-            
-            for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
+            //检测persistentDataPath地址里有没有这个文件,如果有 则将其作为本地版本
+            VersionJsonObject localVersion = null;
+            if (File.Exists(Application.persistentDataPath + "/version.json"))
             {
-                //assetBundleRequest.allAssets[i].
+                localVersion = Helper.LoadVersionJson(File.ReadAllText(Application.persistentDataPath + "/version.json"));
+            }
+            else
+            {
+                localVersion = Helper.LoadVersionJson(Resources.Load("version").ToString());
+            }
 
-                Stream sw = null;
-                FileInfo fileInfo = new FileInfo(savePath + "/lua/" + assetBundleRequest.allAssets[i].name);
-                if (fileInfo.Exists)
-                {
-                    fileInfo.Delete();
-                }
-                CheckPath(fileInfo.Directory.FullName);
-                //如果此文件不存在则创建
-                sw = fileInfo.Create();
-                //写入
-                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
-                sw.Write(byteArray, 0, byteArray.Length);
+            string s = Resources.Load("version").ToString();
 
-                sw.Flush();
-                //关闭流
-                sw.Close();
-                //销毁流
-                sw.Dispose();
+            VersionJsonObject serviceVersion = Helper.LoadVersionJson(content);
+
+            if (serviceVersion.version > localVersion.version)//服务器版本大于本地版本
+            {
+                //下面应该检测该下哪些Bundle
+                Helper.CompareFileEx()
+
+
+
+                //保存当前这份最新的文件
+                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
+                Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray, byteArray.Length);
             }
         });
-
-        LuaManager.Instance.Init();
     }
 
 

@@ -89,7 +89,7 @@ public class AssetBundleManager : MonoBehaviour
         {
             Debug.LogError(AssetsHost + "/" + RootAssetsName);
             ServerManifestWWW = new WWW(AssetsHost + "/" + RootAssetsName);
-            
+
             Debug.Log("___当前请求总依赖文件~\n");
 
             yield return ServerManifestWWW;
@@ -227,7 +227,9 @@ public class AssetBundleManager : MonoBehaviour
             AssetBundle assetBundleDependencies = AssetBundle.LoadFromFile(LocalPath + "/" + AllDependencies[i]);
             assetBundleDependencies.LoadAllAssets();
         }
-        return AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
+
+        AssetBundle ab = AssetBundle.LoadFromFile(LocalPath + "/" + AssetName);
+        return ab;
     }
 
     /// <summary>

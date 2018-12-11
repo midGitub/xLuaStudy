@@ -43,9 +43,16 @@ public static class ABHelper
 
         string json = Helper.JsonTree(allJsonData.ToJson());
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
-        string jsonSavePath = "Assets/Resources/version.json";
-        FileInfo fileInfo = new FileInfo(jsonSavePath);
-        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfo.Directory.FullName), fileInfo.Name, byteArray, byteArray.Length);
+
+        //本地存一份version
+        string jsonSavePathLocal = "Assets/Resources/version.json";
+        FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray, byteArray.Length);
+
+        //服务器存一份version
+        string jsonSavePathService = "Assets/Resources/version.json";
+        FileInfo fileInfoService = new FileInfo(jsonSavePathService);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoService.Directory.FullName), fileInfoService.Name, byteArray, byteArray.Length);
     }
 
     [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]
