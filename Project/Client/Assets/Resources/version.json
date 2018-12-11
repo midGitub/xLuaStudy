@@ -1,1 +1,7 @@
-{"VersionCode":0,"ABHashGroup":[{"lua/33d":1680477613},{"lua/newfolder":1459666203},{"view/uirootview.prefab.unity3d":1735208756},{"view/uistartview.prefab.unity3d":-1083765604}]}
+{"VersionCode":0,
+"ABHashGroup":[
+	{"lua/33d":-399215098},
+	{"lua/44":972415968},
+	{"view/uirootview.prefab.unity3d":1735208756},
+	{"view/uistartview.prefab.unity3d":-1083765604}
+]}

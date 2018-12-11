@@ -97,7 +97,7 @@ public class AssetBundleManager : MonoBehaviour
             {
                 //加载总的配置文件
                 assetBundleManifestServer = ServerManifestWWW.assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-              string[] s =  assetBundleManifestServer.GetAllAssetBundles();
+                string[] s = assetBundleManifestServer.GetAllAssetBundles();
                 Debug.Log("___当前请求总依赖文件~\n");
             }
             else
@@ -157,7 +157,7 @@ public class AssetBundleManager : MonoBehaviour
                 yield return new WaitForSeconds(0.2f);
             }
             //保存到本地
-            SaveAsset2LocalFile(saveLocalPath, item.Key, wwwAsset.bytes, wwwAsset.bytes.Length);
+            Helper.SaveAssetToLocalFile(saveLocalPath, item.Key, wwwAsset.bytes, wwwAsset.bytes.Length);
         }
 
         if (LocalManifestAssetBundle != null)
@@ -258,51 +258,11 @@ public class AssetBundleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 将文件模型创建到本地
-    /// </summary>
-    /// <param name="path"></param>
-    /// <param name="name"></param>
-    /// <param name="info"></param>
-    /// <param name="length"></param>
-    void SaveAsset2LocalFile(string path, string name, byte[] info, int length)
-    {
-        Stream sw = null;
-        FileInfo fileInfo = new FileInfo(path + "/" + name);
-        if (fileInfo.Exists)
-        {
-            fileInfo.Delete();
-        }
-        CheckPath(fileInfo.Directory.FullName);
-        //如果此文件不存在则创建
-        sw = fileInfo.Create();
-        //写入
-        sw.Write(info, 0, length);
-
-        sw.Flush();
-        //关闭流
-        sw.Close();
-        //销毁流
-        sw.Dispose();
-
-        Debug.Log(name + "成功保存到本地~");
-    }
-
-    /// <summary>
     /// 删除文件
     /// </summary>
     /// <param name="path"></param>
     void DeleteFile(string path)
     {
         File.Delete(path);
-    }
-
-    public void CheckPath(string path)
-    {
-        string[] s = path.Split('\\');
-        path = path.Replace('\\', '/');
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
     }
 }

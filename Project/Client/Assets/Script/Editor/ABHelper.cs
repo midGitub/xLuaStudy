@@ -16,26 +16,15 @@ public static class ABHelper
     {
         SetBundleNameAll();
 
-        string dir = CheckPathExistence(servicePathEditor);
+        string dir = Helper.CheckPathExistence(servicePathEditor);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
         }
-        BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
+        BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
 
         string[] allAssetBundlesName = manifest.GetAllAssetBundles();
-
-        string jsonSavePath = "Assets/Resources/version.json";
-
-        //  JsonWriter jsonWriter = new JsonWriter();
-        // jsonWriter.WriteObjectStart();
-
-        // jsonWriter.WritePropertyName("Version");//当前客户端初始版本
-        // jsonWriter.Write(1);
-
-        //  jsonWriter.WritePropertyName("ABHashGroup");
-        //jsonWriter.WriteArrayStart();
 
         JsonData allJsonData = new JsonData() { };
 
@@ -50,42 +39,13 @@ public static class ABHelper
             curABData[allAssetBundlesName[i]] = hashCode;
 
             allJsonData["ABHashGroup"].Add(curABData);
-            //jsonWriter.WritePropertyName(allAssetBundlesName[i]);
-            // jsonWriter.Write(allAssetBundlesName[i] + ":" + hashCode);
-        }
-        //jsonWriter.WriteArrayEnd();
-
-        // jsonWriter.WriteObjectEnd();
-
-
-
-
-
-
-
-        Stream sw = null;
-        FileInfo fileInfo = new FileInfo(jsonSavePath);
-        if (fileInfo.Exists)
-        {
-            fileInfo.Delete();
         }
 
-        CheckPathExistence(fileInfo.Directory.FullName);
-
-        //如果此文件不存在则创建
-        sw = fileInfo.Create();
-        //写入
-        string json = allJsonData.ToJson();
+        string json = Helper.JsonTree(allJsonData.ToJson());
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
-        sw.Write(byteArray, 0, byteArray.Length);
-
-        sw.Flush();
-        //关闭流
-        sw.Close();
-        //销毁流
-        sw.Dispose();
-
-        Debug.Log("json" + "成功保存到本地~");
+        string jsonSavePath = "Assets/Resources/version.json";
+        FileInfo fileInfo = new FileInfo(jsonSavePath);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfo.Directory.FullName), fileInfo.Name, byteArray, byteArray.Length);
     }
 
     [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]
@@ -93,18 +53,17 @@ public static class ABHelper
     {
         SetBundleNameAll();
 
-        string dir = CheckPathExistence(servicePathAndroid);
+        string dir = Helper.CheckPathExistence(servicePathAndroid);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
         }
-        BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
+        BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.Android);
-
-
     }
 
     #region 设置AssetBundleName
+
     public static void SetBundleNameAll()
     {
         SetViewPrefabName();
@@ -161,18 +120,57 @@ public static class ABHelper
 
     public static void SetLuaBundleName()
     {
-        string outPutByteRootPath = CheckPathExistence("Assets/LuaByte/");
+        string outputByteRootPath = Helper.CheckPathExistence("Assets/LuaByte/");
+        string[] allOutputByteFilePaths = Helper.GetFiles(outputByteRootPath, null, true);
 
-        /// 清零掉这个 目录下的 所有文件夹以及文件 方便重新生成
-        string[] byteDirectories = Directory.GetDirectories(outPutByteRootPath);
-
-        for (int i = 0; i < byteDirectories.Length; i++)
+        for (int i = 0; i < allOutputByteFilePaths.Length; i++)
         {
-            FileUtil.DeleteFileOrDirectory(byteDirectories[i]);
+            allOutputByteFilePaths[i] = allOutputByteFilePaths[i].Replace('\\', '/');
+            if (allOutputByteFilePaths[i].Contains("meta"))//meta文件作删除处理
+            {
+                FileUtil.DeleteFileOrDirectory(allOutputByteFilePaths[i]);
+            }
+            else
+            {
+                string[] a = allOutputByteFilePaths[i].Split('/');
+                string fileNameSuffix = a[a.Length - 1];
+
+                string[] b = fileNameSuffix.Split('.');
+                string fileName = b[0];
+
+                //判断原LUA目录是否包含打包输出目录的文件
+                //如包含 则进一步比较其文件内容
+                //如不包含 则删除
+                string originLuaPath = allOutputByteFilePaths[i].Replace("LuaByte", "Lua").Replace(".bytes", string.Empty);
+
+                if (File.Exists(originLuaPath))
+                {
+                    //如果文本对比不通过 则删除
+                    if (!Helper.CompareFile(originLuaPath, allOutputByteFilePaths[i]) || !Helper.CompareFileEx(originLuaPath, allOutputByteFilePaths[i]))
+                    {
+                        FileUtil.DeleteFileOrDirectory(allOutputByteFilePaths[i]);
+                    }
+                }
+                else
+                {
+                    FileUtil.DeleteFileOrDirectory(allOutputByteFilePaths[i]);
+                }
+            }
+        }
+
+        string[] allOutputDirectories = Helper.GetDirectories("Assets/LuaByte/");
+        for (int i = 0; i < allOutputDirectories.Length; i++)
+        {
+            System.IO.DirectoryInfo di = new System.IO.DirectoryInfo(allOutputDirectories[i]);
+            if (di.GetFiles().Length + di.GetDirectories().Length == 0)
+            {
+                //目录为空
+                FileUtil.DeleteFileOrDirectory(allOutputDirectories[i]);
+            }
         }
 
         ///将Lua文件夹内的文件复制到LuaByte文件夹，并且添加后缀，同时记录路径
-        List<string> outPutBytePathList = new List<string>();
+        List<string> outputBytePathList = new List<string>();
         string[] allDirectories = Directory.GetDirectories("Assets/Lua/");
         for (int i = 0; i < allDirectories.Length; i++)
         {
@@ -188,26 +186,29 @@ public static class ABHelper
                     outPutBytePath += pathSplit[m] + "/";
                 }
 
-                outPutBytePath = CheckPathExistence(outPutBytePath.Replace("Lua", "LuaByte")) + fname + ".bytes";
-                FileUtil.CopyFileOrDirectory(luaFiles[j], outPutBytePath);
-                outPutBytePathList.Add(outPutBytePath);
+                outPutBytePath = Helper.CheckPathExistence(outPutBytePath.Replace("Lua", "LuaByte")) + fname + ".bytes";
+
+                //在文件不存在的情况下才拷贝过去
+                if (!File.Exists(outPutBytePath))
+                {
+                    FileUtil.CopyFileOrDirectory(luaFiles[j], outPutBytePath);
+                }
+                outputBytePathList.Add(outPutBytePath);
             }
         }
 
         //设置AssetBundleName
-        for (int i = 0; i < outPutBytePathList.Count; i++)
+        for (int i = 0; i < outputBytePathList.Count; i++)
         {
-            Debug.LogError(outPutBytePathList[i] + "  " + i);
-            AssetImporter importer = AssetImporter.GetAtPath(outPutBytePathList[i]);
+            Debug.LogError(outputBytePathList[i] + "  " + i);
+            AssetImporter importer = AssetImporter.GetAtPath(outputBytePathList[i]);
             if (importer != null)
             {
-                string[] split = outPutBytePathList[i].Split('/');
+                string[] split = outputBytePathList[i].Split('/');
                 importer.assetBundleName = "lua/" + split[2];
             }
 
-            importer = AssetImporter.GetAtPath("Assets/LuaByte/NewFolder/wwwrr.lua.bytes");
-
-            if (EditorUtility.DisplayCancelableProgressBar("SetBundleName", "LuaBundleName --> Lua", (float)i / outPutBytePathList.Count))
+            if (EditorUtility.DisplayCancelableProgressBar("SetBundleName", "LuaBundleName --> Lua", (float)i / outputBytePathList.Count))
             {
                 EditorUtility.ClearProgressBar();
                 return;
@@ -219,13 +220,4 @@ public static class ABHelper
     }
 
     #endregion
-    public static string CheckPathExistence(string path)
-    {
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-        AssetDatabase.Refresh();
-        return path;
-    }
 }
