@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: e15de8fe9d53a3543bfa2035b0ac91d5
-timeCreated: 1543550447
+guid: 6b3d156644446d04a92fe9b8ddca4abc
+timeCreated: 1544500356
 licenseType: Pro
 TextScriptImporter:
   userData: 
-  assetBundleName: 
+  assetBundleName: lua/base
   assetBundleVariant: 

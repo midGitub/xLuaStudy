@@ -44,7 +44,6 @@ public class Helper
     /// <returns></returns>
     public static string CheckPathExistence(string path)
     {
-        path = path.Replace('\\', '/');
         if (!Directory.Exists(path))
         {
             Directory.CreateDirectory(path);

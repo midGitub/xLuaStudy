@@ -121,6 +121,7 @@ public static class ABHelper
     public static void SetLuaBundleName()
     {
         string outputByteRootPath = Helper.CheckPathExistence("Assets/LuaByte/");
+        string originLuaRootPath = Helper.CheckPathExistence("Assets/Lua/");
         string[] allOutputByteFilePaths = Helper.GetFiles(outputByteRootPath, null, true);
 
         for (int i = 0; i < allOutputByteFilePaths.Length; i++)
@@ -169,41 +170,67 @@ public static class ABHelper
             }
         }
 
-        ///将Lua文件夹内的文件复制到LuaByte文件夹，并且添加后缀，同时记录路径
+        ///将Lua文件夹内改动过的文件复制到LuaByte文件夹，并且添加后缀，同时记录路径
         List<string> outputBytePathList = new List<string>();
-        string[] allDirectories = Directory.GetDirectories("Assets/Lua/");
-        for (int i = 0; i < allDirectories.Length; i++)
+        string[] originLuaPaths = Helper.GetFiles(originLuaRootPath, null, true);
+
+        for (int i = 0; i < originLuaPaths.Length; i++)
         {
-            string[] luaFiles = Directory.GetFiles(allDirectories[i] + "/", "*.lua", SearchOption.TopDirectoryOnly);
-            for (int j = 0; j < luaFiles.Length; j++)
+            originLuaPaths[i] = originLuaPaths[i].Replace('\\', '/');
+            if (!originLuaPaths[i].Contains("meta"))//meta文件作删除处理
             {
-                string fname = Path.GetFileName(luaFiles[j]);
-                string[] pathSplit = luaFiles[j].Split('/');
+                string copyPath = originLuaPaths[i].Replace(originLuaRootPath, outputByteRootPath) + ".bytes";
 
-                string outPutBytePath = string.Empty;
-                for (int m = 0; m < pathSplit.Length - 1; m++)
+                string[] copyPathSplit = copyPath.Split('/');
+                string needCheckCopyPath = string.Empty;
+                for (int j = 0; j < copyPathSplit.Length - 1; j++)
                 {
-                    outPutBytePath += pathSplit[m] + "/";
+                    needCheckCopyPath += copyPathSplit[j] + "/";
                 }
 
-                outPutBytePath = Helper.CheckPathExistence(outPutBytePath.Replace("Lua", "LuaByte")) + fname + ".bytes";
-
+                Helper.CheckPathExistence(needCheckCopyPath);
                 //在文件不存在的情况下才拷贝过去
-                if (!File.Exists(outPutBytePath))
+                if (!File.Exists(copyPath))
                 {
-                    FileUtil.CopyFileOrDirectory(luaFiles[j], outPutBytePath);
+                    FileUtil.CopyFileOrDirectory(originLuaPaths[i], copyPath);
                 }
-                outputBytePathList.Add(outPutBytePath);
+                outputBytePathList.Add(copyPath);
             }
         }
+
+        //string[] allDirectories = Directory.GetDirectories("Assets/Lua/");
+        //for (int i = 0; i < allDirectories.Length; i++)
+        //{
+        //    string[] luaFiles = Directory.GetFiles(allDirectories[i] + "/", "*.lua", SearchOption.TopDirectoryOnly);
+        //    for (int j = 0; j < luaFiles.Length; j++)
+        //    {
+        //        string fname = Path.GetFileName(luaFiles[j]);
+        //        string[] pathSplit = luaFiles[j].Split('/');
+
+        //        string outPutBytePath = string.Empty;
+        //        for (int m = 0; m < pathSplit.Length - 1; m++)
+        //        {
+        //            outPutBytePath += pathSplit[m] + "/";
+        //        }
+
+        //        outPutBytePath = Helper.CheckPathExistence(outPutBytePath.Replace("Lua", "LuaByte")) + fname + ".bytes";
+
+        //        //在文件不存在的情况下才拷贝过去
+        //        if (!File.Exists(outPutBytePath))
+        //        {
+        //            FileUtil.CopyFileOrDirectory(luaFiles[j], outPutBytePath);
+        //        }
+        //        outputBytePathList.Add(outPutBytePath);
+        //    }
+        //}
 
         //设置AssetBundleName
         for (int i = 0; i < outputBytePathList.Count; i++)
         {
-            Debug.LogError(outputBytePathList[i] + "  " + i);
             AssetImporter importer = AssetImporter.GetAtPath(outputBytePathList[i]);
             if (importer != null)
             {
+                Debug.LogError(outputBytePathList[i] + "  " + i + "   in");
                 string[] split = outputBytePathList[i].Split('/');
                 importer.assetBundleName = "lua/" + split[2];
             }
