@@ -29,7 +29,7 @@ public static class ABHelper
         JsonData allJsonData = new JsonData() { };
 
         allJsonData["VersionCode"] = GameSetting.Instance.versionCode;
-        allJsonData["ABHashGroup"] = new JsonData();
+        allJsonData["ABHashList"] = new JsonData();
         for (int i = 0; i < allAssetBundlesName.Length; i++)
         {
             Hash128 hash = manifest.GetAssetBundleHash(allAssetBundlesName[i]);
@@ -38,7 +38,7 @@ public static class ABHelper
             JsonData curABData = new JsonData();
             curABData[allAssetBundlesName[i]] = hashCode;
 
-            allJsonData["ABHashGroup"].Add(curABData);
+            allJsonData["ABHashList"].Add(curABData);
         }
 
         string json = Helper.JsonTree(allJsonData.ToJson());
@@ -157,6 +157,12 @@ public static class ABHelper
                     FileUtil.DeleteFileOrDirectory(allOutputByteFilePaths[i]);
                 }
             }
+
+            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "CompareLua --> Lua", (float)i / allOutputByteFilePaths.Length))
+            {
+                EditorUtility.ClearProgressBar();
+                return;
+            }
         }
 
         string[] allOutputDirectories = Helper.GetDirectories("Assets/LuaByte/");
@@ -196,46 +202,25 @@ public static class ABHelper
                 }
                 outputBytePathList.Add(copyPath);
             }
+
+            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "CopyLua --> Lua", (float)i / originLuaPaths.Length))
+            {
+                EditorUtility.ClearProgressBar();
+                return;
+            }
         }
 
-        //string[] allDirectories = Directory.GetDirectories("Assets/Lua/");
-        //for (int i = 0; i < allDirectories.Length; i++)
-        //{
-        //    string[] luaFiles = Directory.GetFiles(allDirectories[i] + "/", "*.lua", SearchOption.TopDirectoryOnly);
-        //    for (int j = 0; j < luaFiles.Length; j++)
-        //    {
-        //        string fname = Path.GetFileName(luaFiles[j]);
-        //        string[] pathSplit = luaFiles[j].Split('/');
-
-        //        string outPutBytePath = string.Empty;
-        //        for (int m = 0; m < pathSplit.Length - 1; m++)
-        //        {
-        //            outPutBytePath += pathSplit[m] + "/";
-        //        }
-
-        //        outPutBytePath = Helper.CheckPathExistence(outPutBytePath.Replace("Lua", "LuaByte")) + fname + ".bytes";
-
-        //        //在文件不存在的情况下才拷贝过去
-        //        if (!File.Exists(outPutBytePath))
-        //        {
-        //            FileUtil.CopyFileOrDirectory(luaFiles[j], outPutBytePath);
-        //        }
-        //        outputBytePathList.Add(outPutBytePath);
-        //    }
-        //}
-
-        //设置AssetBundleName
+        //设置输出文件夹下的AssetBundleName
         for (int i = 0; i < outputBytePathList.Count; i++)
         {
             AssetImporter importer = AssetImporter.GetAtPath(outputBytePathList[i]);
             if (importer != null)
             {
-                Debug.LogError(outputBytePathList[i] + "  " + i + "   in");
                 string[] split = outputBytePathList[i].Split('/');
                 importer.assetBundleName = "lua/" + split[2];
             }
 
-            if (EditorUtility.DisplayCancelableProgressBar("SetBundleName", "LuaBundleName --> Lua", (float)i / outputBytePathList.Count))
+            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "LuaBundleName --> Lua", (float)i / outputBytePathList.Count))
             {
                 EditorUtility.ClearProgressBar();
                 return;

@@ -1,6 +1,7 @@
 {"VersionCode":0,
-"ABHashGroup":[
-	{"lua/base":-346353888},
+"ABHashList":[
+	{"lua/base":546070441},
+	{"lua/view":1358705631},
 	{"view/uirootview.prefab.unity3d":1735208756},
 	{"view/uistartview.prefab.unity3d":-1083765604}
 ]}

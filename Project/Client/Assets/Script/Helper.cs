@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LitJson;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,7 @@ public class Helper
         //销毁流
         sw.Dispose();
 
-        Debug.Log(name + "成功保存到本地~");
+        Debug.Log(name + "成功保存到本地!");
     }
 
     /// <summary>
@@ -322,6 +323,33 @@ public class Helper
         }
 
         return lst.ToArray();
+    }
+
+    /// <summary>
+    /// 加载版本信息文件
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static VersionJsonObject LoadVersionJson(string path)
+    {
+        VersionJsonObject versionJsonObject = new VersionJsonObject();
+
+        JsonData jsonData = JsonMapper.ToObject(File.ReadAllText(path));
+        versionJsonObject.version = uint.Parse(jsonData["VersionCode"].ToString());
+
+        int count = jsonData["ABHashList"].Count;
+
+        for (int i = 0; i < count; i++)
+        {
+            JsonData abhashData = jsonData["ABHashList"][i];
+
+            ABNameHash abNameHash = new ABNameHash();
+            abNameHash.abName = abhashData.Keys.ToArray()[0];
+            abNameHash.hashCode = int.Parse(abhashData[0].ToJson());
+            versionJsonObject.ABHashList.Add(abNameHash);
+        }
+
+        return versionJsonObject;
     }
 }
 

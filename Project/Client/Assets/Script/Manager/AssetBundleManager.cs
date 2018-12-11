@@ -89,7 +89,7 @@ public class AssetBundleManager : MonoBehaviour
         {
             Debug.LogError(AssetsHost + "/" + RootAssetsName);
             ServerManifestWWW = new WWW(AssetsHost + "/" + RootAssetsName);
-
+            
             Debug.Log("___当前请求总依赖文件~\n");
 
             yield return ServerManifestWWW;
