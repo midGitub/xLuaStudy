@@ -3,7 +3,7 @@ require "CtrlNames"
  -- CtrlMgr.lua  管理控制器脚本、里面table 表存储其名字及其对应的ctrl脚本的实例 --
 GameManager = {}
 local this = GameManager
-
+local c
 -- 将View的脚本一一注册进去
 function GameManager.InitViews()
         require("UIStartView")

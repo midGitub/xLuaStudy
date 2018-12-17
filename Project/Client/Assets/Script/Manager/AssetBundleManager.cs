@@ -171,6 +171,55 @@ public class AssetBundleManager : MonoBehaviour
         }
     }
 
+    public IEnumerator DownLoadManifestCoroutine(List<string> abNameList)
+    {
+        string AssetsHost = "http://192.168.1.175/AssetBundleEditor";
+        string RootAssetsName = "AssetBundleEditor";
+        Debug.LogError(AssetsHost + "/" + RootAssetsName);
+
+        AssetBundleManifest assetBundleManifestServer = null;
+        string[] allABList = null;
+
+        WWW ServerManifestWWW = new WWW(AssetsHost + "/" + RootAssetsName);
+
+        Debug.Log("___当前请求总依赖文件~\n");
+
+        yield return ServerManifestWWW;
+        if (ServerManifestWWW.isDone)
+        {
+            //加载总的配置文件
+            assetBundleManifestServer = ServerManifestWWW.assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            allABList = assetBundleManifestServer.GetAllAssetBundles();
+            Debug.Log("___当前请求总依赖文件~\n");
+        }
+        else
+        {
+            throw new Exception("总依赖文件下载失败~~~\n");
+        }
+
+        for (int i = 0; i < abNameList.Count; i++)
+        {
+            //直接加载所有的依赖项就好了
+            WWW wwwAsset = new WWW(AssetsHost + "/" + abNameList[i]);
+            //获取加载进度
+            while (!wwwAsset.isDone)
+            {
+                Debug.Log(string.Format("下载 {0} :{1}%", i + 1, abNameList.Count));
+                yield return new WaitForSeconds(0.2f);
+            }
+            //保存到本地
+            Helper.SaveAssetToLocalFile(Application.persistentDataPath, abNameList[i], wwwAsset.bytes, wwwAsset.bytes.Length);
+        }
+
+        //卸载掉,无法同时加载多个配置文件
+        ServerManifestWWW.assetBundle.Unload(true);
+    }
+
+    public void DownLoadAssetBundleByList(List<string> abNameList)
+    {
+        StartCoroutine(DownLoadManifestCoroutine(abNameList));
+    }
+
     /// <summary>
     /// 检测本地文件是否存在已经是否是最新
     /// </summary>

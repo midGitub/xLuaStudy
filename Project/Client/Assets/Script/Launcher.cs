@@ -79,19 +79,41 @@ public class Launcher : MonoBehaviour
 
             VersionJsonObject serviceVersion = Helper.LoadVersionJson(content);
 
+            List<string> shouldDownloadList = new List<string>();
+
             if (serviceVersion.version > localVersion.version)//服务器版本大于本地版本
             {
-                //下面应该检测该下哪些Bundle
-                Helper.CompareFileEx()
-
-
+                //下面检测该下哪些Bundle
+                foreach (ABNameHash singleServiceNameHash in serviceVersion.ABHashList)
+                {
+                    ABNameHash singleLocalNameHash = localVersion.ABHashList.Find(t => t.abName == singleServiceNameHash.abName);
+                    if (singleLocalNameHash != null)
+                    {
+                        if (singleLocalNameHash.hashCode != singleServiceNameHash.hashCode)
+                        {
+                            shouldDownloadList.Add(singleServiceNameHash.abName);
+                        }
+                    }
+                    else
+                    {
+                        shouldDownloadList.Add(singleServiceNameHash.abName);
+                    }
+                }
 
                 //保存当前这份最新的文件
                 byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
                 Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray, byteArray.Length);
             }
+
+            if (shouldDownloadList.Count > 0)
+            {
+                AssetBundleManager.Instance.DownLoadAssetBundleByList(shouldDownloadList);
+            }
+
         });
     }
+
+
 
 
 

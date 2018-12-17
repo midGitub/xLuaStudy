@@ -3,7 +3,7 @@ local this = UIStartView
 
 local transform
 local gameObject
-
+local c;
 function UIStartView.Awake(obj)
     gameObject = obj
     transform = obj.transform

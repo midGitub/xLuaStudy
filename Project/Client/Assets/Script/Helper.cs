@@ -119,6 +119,8 @@ public class Helper
         return (firstFileLine == secondFileLine);
     }
 
+
+
     #region JSON
     /// <summary>
     /// JSON字符串格式化
