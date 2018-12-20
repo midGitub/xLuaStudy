@@ -34,8 +34,6 @@ public class Helper
         sw.Close();
         //销毁流
         sw.Dispose();
-
-        Debug.Log(name + "成功保存到本地!");
     }
 
     /// <summary>
@@ -353,6 +351,5 @@ public class Helper
 
         return versionJsonObject;
     }
-
 }
 
