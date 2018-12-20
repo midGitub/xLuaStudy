@@ -13,6 +13,8 @@ public class Launcher : MonoBehaviour
 
     private List<string> allSAFilePathList = new List<string>();
     private uint pathCount = 0;
+
+    private UILoadingView uiLoadingView;
     private void Start()
     {
 
@@ -21,6 +23,8 @@ public class Launcher : MonoBehaviour
     private void Awake()
     {
         GameObject canvas = GameObject.Find("Canvas");
+
+        uiLoadingView = canvas.transform.FindChild("UILoadingView").GetComponent<UILoadingView>();
 
         string savePath = Application.persistentDataPath;
 
@@ -62,7 +66,7 @@ public class Launcher : MonoBehaviour
         //LuaManager.Instance.Init();
 
 
-        //System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[2];
+
 
         //tasks[0] = (cb) =>
         // {
@@ -78,19 +82,38 @@ public class Launcher : MonoBehaviour
         // };
         //return;
 
-        string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
-        string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
+        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[2];
 
-        for (int i = 0; i < allSAFilePathGroup.Length; i++)
+        tasks[0] = (cb) =>
         {
-            allSAFilePathGroup[i] = allSAFilePathGroup[i].Replace("\\", "/");
-            if (!allSAFilePathGroup[i].Contains(".meta") && !allSAFilePathGroup[i].Contains(".manifest"))
-            {
-                allSAFilePathList.Add(allSAFilePathGroup[i]);
-            }
-        }
+            string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
+            string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
 
-        StartCoroutine(WWWCopyCoroutine());
+            for (int i = 0; i < allSAFilePathGroup.Length; i++)
+            {
+                allSAFilePathGroup[i] = allSAFilePathGroup[i].Replace("\\", "/");
+                if (!allSAFilePathGroup[i].Contains(".meta") && !allSAFilePathGroup[i].Contains(".manifest"))
+                {
+                    allSAFilePathList.Add(allSAFilePathGroup[i]);
+                }
+            }
+
+            StartCoroutine(SACopyToPDCoroutine(cb));
+        };
+
+        tasks[1] = (cb) =>
+        {
+            cb.Invoke((int)LocalCode.SUCCESS);
+            //Debug.LogError();
+        };
+
+        Action<int> finalCb = (code) =>
+        {
+            Debug.LogError((LocalCode)code);
+        };
+
+        AsyncHelper asyncHelper = new AsyncHelper();
+        asyncHelper.Waterfall(tasks, finalCb);
 
         return;
         string url = serverPath + "/version.json";
@@ -145,55 +168,22 @@ public class Launcher : MonoBehaviour
         });
     }
 
-
-
-
-
-
-    public void Update()
-    {
-
-    }
-
-    public void CheckPath(string path)
-    {
-        string[] s = path.Split('\\');
-        path = path.Replace('\\', '/');
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-    }
-
-    /// <summary> 
-    /// 将一个object对象序列化，返回一个byte[]         
-    /// </summary> 
-    /// <param name="obj">能序列化的对象</param>         
-    /// <returns></returns> 
-    public static byte[] ObjectToBytes(object obj)
-    {
-        using (MemoryStream ms = new MemoryStream())
-        {
-            IFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(ms, obj);
-            return ms.GetBuffer();
-        }
-    }
-
     /// <summary>
-    /// 将streaming path 下的文件copy到对应用
+    /// 将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
     /// 为什么不直接用io函数拷贝，原因在于streaming目录不支持，
-    /// 不管理是用getStreamingPath_for_www，还是Application.streamingAssetsPath，
-    /// io方法都会说文件不存在
     /// </summary>
-    /// <param name="fileName"></param>
-    IEnumerator WWWCopyCoroutine()
+    IEnumerator SACopyToPDCoroutine(Action<int> cb)
     {
         List<string>.Enumerator enumerator = allSAFilePathList.GetEnumerator();
+        int curIndexInAllSAFilePathList = 0;
         while (enumerator.MoveNext() == true)
         {
+            curIndexInAllSAFilePathList++;
+            uiLoadingView.Refresh(curIndexInAllSAFilePathList, allSAFilePathList.Count, "正在复制文件(从StreamingAssets至persistentDataPath)");
             string sourcePath = enumerator.Current;
             string[] sourcePathGroup = sourcePath.Split('/');
+
+            //解析源路径
             string posteriorSourcePath = string.Empty;
             for (int i = sourcePathGroup.Length - 1; i > 0; i--)
             {
@@ -204,8 +194,7 @@ public class Launcher : MonoBehaviour
                 posteriorSourcePath = sourcePathGroup[i] + (i == sourcePathGroup.Length - 1 ? string.Empty : "/") + posteriorSourcePath;
             }
 
-
-            string targetPath = Application.persistentDataPath + "/" + posteriorSourcePath;
+            string targetPath = Application.persistentDataPath + "/" + posteriorSourcePath;//构建目标路径
             string[] targetPathGroup = targetPath.Split('/');
 
             string needCheckDirectoryPath = string.Empty;//需要检查的文件夹地址
@@ -215,12 +204,15 @@ public class Launcher : MonoBehaviour
             }
             Helper.CheckPathExistence(needCheckDirectoryPath);
 
-            Debug.Log("des:" + targetPath);
             WWW www = new WWW(GetStreamingPathPre() + sourcePath);
             yield return www;
             if (!string.IsNullOrEmpty(www.error))
             {
-                Debug.Log("www.error:" + www.error);
+                Debug.Log("SACopyToPDCoroutine Error:" + www.error);
+                if (cb != null)
+                {
+                    cb.Invoke((int)LocalCode.FAILED);
+                }
             }
             else
             {
@@ -236,6 +228,10 @@ public class Launcher : MonoBehaviour
             www.Dispose();
         }
 
+        if (cb != null)
+        {
+            cb.Invoke((int)LocalCode.SUCCESS);
+        }
     }
 
     string GetStreamingPathPre()

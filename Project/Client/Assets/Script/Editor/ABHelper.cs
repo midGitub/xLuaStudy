@@ -230,4 +230,13 @@ public static class ABHelper
     }
 
     #endregion
+
+    #region 上传本地AssetsBundle至服务器
+
+    [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 10)]
+    public static void UploadAssetsBundleToServer()
+    {
+
+    }
+    #endregion
 }
