@@ -8,15 +8,11 @@ using LitJson;
 
 public static class ABHelper
 {
-    private static string localPath = "AssetBundle/";
-    private static string servicePathEditor = "D:/LocalServer/AssetBundleEditor/";
-    private static string servicePathAndroid = "D:/LocalServer/AssetBundleAndroid/";
-    [MenuItem("ABHelper/BuildAssetBundle", false, 0)]
+    [MenuItem("ABHelper/BuildAssetBundleEditor", false, 0)]
     public static void BuildAssetBundleEditor()
     {
         SetBundleNameAll();
-
-        string dir = Helper.CheckPathExistence(servicePathEditor);
+        string dir = Helper.CheckPathExistence(PathDefine.buildABPathEditor);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
@@ -44,15 +40,10 @@ public static class ABHelper
         string json = Helper.JsonTree(allJsonData.ToJson());
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
-        //本地存一份version
-        string jsonSavePathLocal = "Assets/Resources/version.json";
+        //存一份version
+        string jsonSavePathLocal = PathDefine.buildVersionPathEditor;
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
-        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray, byteArray.Length);
-
-        //服务器存一份version
-        string jsonSavePathService = "Assets/Resources/version.json";
-        FileInfo fileInfoService = new FileInfo(jsonSavePathService);
-        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoService.Directory.FullName), fileInfoService.Name, byteArray, byteArray.Length);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
     }
 
     [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]
@@ -60,7 +51,7 @@ public static class ABHelper
     {
         SetBundleNameAll();
 
-        string dir = Helper.CheckPathExistence(servicePathAndroid);
+        string dir = Helper.CheckPathExistence(PathDefine.buildABPathAndroid);
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);

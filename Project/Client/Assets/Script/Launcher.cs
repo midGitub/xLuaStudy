@@ -9,14 +9,15 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class Launcher : MonoBehaviour
 {
     private GameObject managerGroupObj;
+    private int curVersionCode = -1;
 
-
-
+    private List<string> allSAFilePathList = new List<string>();
+    private uint pathCount = 0;
     private void Start()
     {
 
     }
-
+    List<uint> ateste = new List<uint>();
     private void Awake()
     {
         GameObject canvas = GameObject.Find("Canvas");
@@ -60,6 +61,38 @@ public class Launcher : MonoBehaviour
 
         //LuaManager.Instance.Init();
 
+
+        //System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[2];
+
+        //tasks[0] = (cb) =>
+        // {
+        //     WWWForm wwwForm = new WWWForm();
+        //     wwwForm.headers.Add("headersKey", "headersValue");
+        //     byte[] byteArray1 = System.Text.Encoding.UTF8.GetBytes("ddd");
+        //     wwwForm.AddBinaryData("2222", byteArray1);
+        //     NetWorkManager.Instance.PostWebMSG("http://192.168.1.175/GetVersion:8080/", wwwForm, (www) =>
+        //     {
+        //         Debug.LogError(www.text);
+        //         cb((int)LocalCode.SUCCESS);
+        //     });
+        // };
+        //return;
+
+        string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
+        string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
+
+        for (int i = 0; i < allSAFilePathGroup.Length; i++)
+        {
+            allSAFilePathGroup[i] = allSAFilePathGroup[i].Replace("\\", "/");
+            if (!allSAFilePathGroup[i].Contains(".meta") && !allSAFilePathGroup[i].Contains(".manifest"))
+            {
+                allSAFilePathList.Add(allSAFilePathGroup[i]);
+            }
+        }
+
+        StartCoroutine(WWWCopyCoroutine());
+
+        return;
         string url = serverPath + "/version.json";
 
         NetWorkManager.Instance.Download(url, (string content) =>
@@ -102,14 +135,13 @@ public class Launcher : MonoBehaviour
 
                 //保存当前这份最新的文件
                 byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
-                Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray, byteArray.Length);
+                Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray);
             }
 
             if (shouldDownloadList.Count > 0)
             {
                 AssetBundleManager.Instance.DownLoadAssetBundleByList(shouldDownloadList);
             }
-
         });
     }
 
@@ -148,4 +180,74 @@ public class Launcher : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 将streaming path 下的文件copy到对应用
+    /// 为什么不直接用io函数拷贝，原因在于streaming目录不支持，
+    /// 不管理是用getStreamingPath_for_www，还是Application.streamingAssetsPath，
+    /// io方法都会说文件不存在
+    /// </summary>
+    /// <param name="fileName"></param>
+    IEnumerator WWWCopyCoroutine()
+    {
+        List<string>.Enumerator enumerator = allSAFilePathList.GetEnumerator();
+        while (enumerator.MoveNext() == true)
+        {
+            string sourcePath = enumerator.Current;
+            string[] sourcePathGroup = sourcePath.Split('/');
+            string posteriorSourcePath = string.Empty;
+            for (int i = sourcePathGroup.Length - 1; i > 0; i--)
+            {
+                if (sourcePathGroup[i] == "StreamingAssets")
+                {
+                    break;
+                }
+                posteriorSourcePath = sourcePathGroup[i] + (i == sourcePathGroup.Length - 1 ? string.Empty : "/") + posteriorSourcePath;
+            }
+
+
+            string targetPath = Application.persistentDataPath + "/" + posteriorSourcePath;
+            string[] targetPathGroup = targetPath.Split('/');
+
+            string needCheckDirectoryPath = string.Empty;//需要检查的文件夹地址
+            for (int i = 0; i < targetPathGroup.Length - 1; i++)
+            {
+                needCheckDirectoryPath = needCheckDirectoryPath + (i == 0 ? string.Empty : "/") + targetPathGroup[i];
+            }
+            Helper.CheckPathExistence(needCheckDirectoryPath);
+
+            Debug.Log("des:" + targetPath);
+            WWW www = new WWW(GetStreamingPathPre() + sourcePath);
+            yield return www;
+            if (!string.IsNullOrEmpty(www.error))
+            {
+                Debug.Log("www.error:" + www.error);
+            }
+            else
+            {
+                if (File.Exists(targetPath))
+                {
+                    File.Delete(targetPath);
+                }
+                FileStream fsDes = File.Create(targetPath);
+                fsDes.Write(www.bytes, 0, www.bytes.Length);
+                fsDes.Flush();
+                fsDes.Close();
+            }
+            www.Dispose();
+        }
+
+    }
+
+    string GetStreamingPathPre()
+    {
+        string pre = string.Empty;
+#if UNITY_EDITOR
+        pre = "file://";
+#elif UNITY_ANDROID
+        pre = "";
+#elif UNITY_IPHONE
+	    pre = "file://";
+#endif
+        return pre;
+    }
 }

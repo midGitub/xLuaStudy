@@ -15,7 +15,7 @@ public class Helper
     /// <param name="name"></param>
     /// <param name="info"></param>
     /// <param name="length"></param>
-    public static void SaveAssetToLocalFile(string path, string name, byte[] info, int length)
+    public static void SaveAssetToLocalFile(string path, string name, byte[] info)
     {
         Stream sw = null;
         FileInfo fileInfo = new FileInfo(path + "/" + name);
@@ -27,7 +27,7 @@ public class Helper
         //如果此文件不存在则创建
         sw = fileInfo.Create();
         //写入
-        sw.Write(info, 0, length);
+        sw.Write(info, 0, info.Length);
 
         sw.Flush();
         //关闭流
@@ -353,5 +353,6 @@ public class Helper
 
         return versionJsonObject;
     }
+
 }
 

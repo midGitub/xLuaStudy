@@ -157,7 +157,7 @@ public class AssetBundleManager : MonoBehaviour
                 yield return new WaitForSeconds(0.2f);
             }
             //保存到本地
-            Helper.SaveAssetToLocalFile(saveLocalPath, item.Key, wwwAsset.bytes, wwwAsset.bytes.Length);
+            Helper.SaveAssetToLocalFile(saveLocalPath, item.Key, wwwAsset.bytes);
         }
 
         if (LocalManifestAssetBundle != null)
@@ -208,7 +208,7 @@ public class AssetBundleManager : MonoBehaviour
                 yield return new WaitForSeconds(0.2f);
             }
             //保存到本地
-            Helper.SaveAssetToLocalFile(Application.persistentDataPath, abNameList[i], wwwAsset.bytes, wwwAsset.bytes.Length);
+            Helper.SaveAssetToLocalFile(Application.persistentDataPath, abNameList[i], wwwAsset.bytes);
         }
 
         //卸载掉,无法同时加载多个配置文件
