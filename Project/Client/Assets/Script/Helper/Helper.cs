@@ -1,4 +1,5 @@
 ﻿using LitJson;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -323,6 +324,38 @@ public class Helper
         }
 
         return lst.ToArray();
+    }
+
+    /// <summary>
+    /// 删除文件夹及子文件内文件
+    /// </summary>
+    /// <param name="str"></param>
+    public static void DeleteFiles(string str)
+    {
+        DirectoryInfo fatherFolder = new DirectoryInfo(str);
+        //删除当前文件夹内文件
+        FileInfo[] files = fatherFolder.GetFiles();
+        foreach (FileInfo file in files)
+        {
+            //string fileName = file.FullName.Substring((file.FullName.LastIndexOf("\\") + 1), file.FullName.Length - file.FullName.LastIndexOf("\\") - 1);
+            string fileName = file.Name;
+            try
+            {
+                if (!fileName.Equals("index.dat"))
+                {
+                    File.Delete(file.FullName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("删除文件夹出错 ---" + ex);
+            }
+        }
+        //递归删除子文件夹内文件
+        foreach (DirectoryInfo childFolder in fatherFolder.GetDirectories())
+        {
+            DeleteFiles(childFolder.FullName);
+        }
     }
 
     /// <summary>

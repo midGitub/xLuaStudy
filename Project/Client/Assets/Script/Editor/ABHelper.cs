@@ -105,11 +105,6 @@ public static class ABHelper
                 Debug.LogError("Prefab {0} load importer failed:" + paths[i]);
                 return;
             }
-            if (EditorUtility.DisplayCancelableProgressBar("SetBundleName", "PrefabBundleName --> Prefab", (float)i / paths.Length))
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
         }
 
         EditorUtility.ClearProgressBar();
@@ -155,12 +150,6 @@ public static class ABHelper
                     FileUtil.DeleteFileOrDirectory(allOutputByteFilePaths[i]);
                 }
             }
-
-            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "CompareLua --> Lua", (float)i / allOutputByteFilePaths.Length))
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
         }
 
         string[] allOutputDirectories = Helper.GetDirectories("Assets/LuaByte/");
@@ -200,13 +189,8 @@ public static class ABHelper
                 }
                 outputBytePathList.Add(copyPath);
             }
-
-            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "CopyLua --> Lua", (float)i / originLuaPaths.Length))
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
         }
+        AssetDatabase.Refresh();
 
         //设置输出文件夹下的AssetBundleName
         for (int i = 0; i < outputBytePathList.Count; i++)
@@ -217,11 +201,9 @@ public static class ABHelper
                 string[] split = outputBytePathList[i].Split('/');
                 importer.assetBundleName = "lua/" + split[2];
             }
-
-            if (EditorUtility.DisplayCancelableProgressBar("SetLuaBundleName", "LuaBundleName --> Lua", (float)i / outputBytePathList.Count))
+            else
             {
-                EditorUtility.ClearProgressBar();
-                return;
+                Debug.LogError("can't not set AssetBundleName  -----   " + outputBytePathList[i]);
             }
         }
 
