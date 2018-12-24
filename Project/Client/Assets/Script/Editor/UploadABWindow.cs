@@ -57,33 +57,17 @@ public class UploadABWindow : EditorWindow
     /// </summary>
     private void Upload()
     {
+        //区分平台
         string pfStr = string.Empty;
-        string sourcePath = string.Empty;
-        string localABPath = string.Empty;
-        string serverPath = string.Empty;
-        string serverPathInLocal = string.Empty;
+        if (platform == 0) { pfStr = "Editor"; }
+        else if (platform == 1) { pfStr = "Android"; }
+        else if (platform == 2) { pfStr = "Ios"; }
 
-        if (platform == 0)
-        {
-            pfStr = "Editor";
-            Debug.Log("正在上传" + pfStr + "平台的AssetsBundle");
-        }
-        else if (platform == 1)
-        {
-            Debug.Log("正在上传Android平台的AssetsBundle");
-        }
-        else if (platform == 2)
-        {
-            Debug.Log("正在上传Ios平台的AssetsBundle");
-        }
-
-        localABPath = Application.streamingAssetsPath + "/" + pfStr + "/AssetsBundle/";
-        serverPath = PathDefine.serverPath + "AssetsBundle/" + version + "/" + pfStr + "/";
-        serverPathInLocal = PathDefine.serverPathInLocal + "AssetsBundle/" + version + "/" + pfStr + "/";
+        Debug.Log("正在上传" + pfStr + "平台的AssetsBundle");
 
         #region 处理AllPackageVersion.json文件
         JsonData allPackageVersionData = new JsonData() { };
-        string allPackageVersionDataPath = PathDefine.serverPathInLocal + "AssetsBundle/AllPackageVersion.json";
+        string allPackageVersionDataPath = PathDefine.serverPathInLocal_AllPackageVersion(pfStr);
         string pristinePkgVersionText = string.Empty;
 
         //新版本信息
@@ -107,7 +91,6 @@ public class UploadABWindow : EditorWindow
             bool versionIsInFile = false;
             for (int i = 0; i < allPackageVersionData.Count; i++)
             {
-                JsonData jjj = allPackageVersionData[i];
                 if (int.Parse(allPackageVersionData[i]["Version"].ToString()) == version)
                 {
                     allPackageVersionData[i]["isNewPackage"] = isNewPackage;
@@ -137,9 +120,9 @@ public class UploadABWindow : EditorWindow
 
         #region 移动有变动的AB到指定文件夹
         //先把对应版本文件夹删掉
-        if (Directory.Exists(serverPathInLocal))
+        if (Directory.Exists(PathDefine.serverPathInLocal(pfStr, version)))
         {
-            Helper.DeleteFiles(serverPathInLocal);
+            Helper.DeleteFiles(PathDefine.serverPathInLocal(pfStr, version));
         }
 
         //获取最后的版本，然后去对应文件夹查找相应的AssetBundle文件
@@ -161,7 +144,7 @@ public class UploadABWindow : EditorWindow
 
         List<string> shouldMoveList = new List<string>();
 
-        AssetBundle localAssetBundle = AssetBundle.LoadFromFile(localABPath + "AssetsBundle");
+        AssetBundle localAssetBundle = AssetBundle.LoadFromFile(PathDefine.localABPath(pfStr) + "AssetsBundle/AssetsBundle");
         AssetBundleManifest localABManifest = localAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
         localAssetBundle.Unload(false);
 
@@ -169,7 +152,7 @@ public class UploadABWindow : EditorWindow
         AssetBundleManifest serverABManifest = null;
         if (!isNewPackage)
         {
-            serverAssetBundle = AssetBundle.LoadFromFile(PathDefine.serverPathInLocal + "AssetsBundle/" + serverRecentVersion + "/Editor/AssetsBundle");
+            serverAssetBundle = AssetBundle.LoadFromFile(PathDefine.serverPathInLocal(pfStr, serverRecentVersion) + "AssetsBundle");
             serverABManifest = serverAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
             serverAssetBundle.Unload(false);
         }
@@ -193,16 +176,16 @@ public class UploadABWindow : EditorWindow
             {
                 shouldMoveList.Add(localAllABName[i]);
             }
-            int hashCode = localHash.GetHashCode();
         }
 
         //上面的localABManifest.GetAllAssetBundles()没有包含这个文件，补上
+        //这个文件每次都会被改动到
         shouldMoveList.Add("AssetsBundle");
 
         //移动AB包
         for (int i = 0; i < shouldMoveList.Count; i++)
         {
-            string targetPath = serverPathInLocal + shouldMoveList[i];
+            string targetPath = PathDefine.serverPathInLocal(pfStr, version) + shouldMoveList[i];
 
             string[] targetPathGroup = targetPath.Split('/');
 
@@ -213,7 +196,7 @@ public class UploadABWindow : EditorWindow
             }
             Helper.CheckPathExistence(needCheckDirectoryPath);
 
-            byte[] fileByte = File.ReadAllBytes(localABPath + shouldMoveList[i]);
+            byte[] fileByte = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
 
             FileStream fsDes = File.Create(targetPath);
             fsDes.Write(fileByte, 0, fileByte.Length);
@@ -230,14 +213,14 @@ public class UploadABWindow : EditorWindow
             for (int i = 0; i < shouldMoveList.Count; i++)
             {
                 //拼接AB版本文件，用于记录每个AB的版本
-                byte[] b = File.ReadAllBytes(localABPath + shouldMoveList[i]);
+                byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
                 JsonData jd = CreteFileVersionItemJson(shouldMoveList[i], version, b.Length);
                 newFileInfoJsonData.Add(jd);
             }
         }
         else
         {
-            string recentFileInfoText = File.ReadAllText(PathDefine.serverPathInLocal + "AssetsBundle/" + serverRecentVersion + "/Editor/FileVersion/fileversion.json", System.Text.Encoding.UTF8);
+            string recentFileInfoText = File.ReadAllText(PathDefine.serverPathInLocal(pfStr, serverRecentVersion) + "FileVersion/fileversion.json", System.Text.Encoding.UTF8);
             newFileInfoJsonData = JsonMapper.ToObject(recentFileInfoText);
 
             //检查替换
@@ -248,7 +231,7 @@ public class UploadABWindow : EditorWindow
                     if (shouldMoveList[j] == newFileInfoJsonData[i]["name"].ToString())
                     {
                         //下面需要补充info
-                        byte[] b = File.ReadAllBytes(localABPath + shouldMoveList[j]);
+                        byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[j]);
                         newFileInfoJsonData[i]["info"][0]["version"] = version;
                         newFileInfoJsonData[i]["info"][0]["size"] = b.Length;
                         break;
@@ -272,7 +255,7 @@ public class UploadABWindow : EditorWindow
 
                 if (isAdd)
                 {
-                    byte[] b = File.ReadAllBytes(localABPath + shouldMoveList[i]);
+                    byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
                     JsonData jd = CreteFileVersionItemJson(shouldMoveList[i], version, b.Length);
                     newFileInfoJsonData.Add(jd);
                 }
@@ -283,12 +266,12 @@ public class UploadABWindow : EditorWindow
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(verJson.ToString());
 
         //保存版本文件
-        if (File.Exists(PathDefine.serverFileVersionPathEditor(version)))
+        if (File.Exists(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json"))
         {
-            File.Delete(PathDefine.serverFileVersionPathEditor(version));
+            File.Delete(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json");
             AssetDatabase.Refresh();
         }
-        FileInfo verFileInfo = new FileInfo(PathDefine.serverFileVersionPathEditor(version));
+        FileInfo verFileInfo = new FileInfo(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json");
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(verFileInfo.Directory.FullName), verFileInfo.Name, byteArray);
 
         #endregion
@@ -319,4 +302,3 @@ public class UploadABWindow : EditorWindow
         return jsonData;
     }
 }
-

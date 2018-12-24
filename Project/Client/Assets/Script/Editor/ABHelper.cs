@@ -12,7 +12,7 @@ public static class ABHelper
     public static void BuildAssetBundleEditor()
     {
         SetBundleNameAll();
-        string dir = Helper.CheckPathExistence(PathDefine.buildABPathEditor);
+        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Editor") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
@@ -41,7 +41,7 @@ public static class ABHelper
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
         //存一份version
-        string jsonSavePathLocal = PathDefine.buildVersionPathEditor;
+        string jsonSavePathLocal = PathDefine.localABPath("Editor") + "Version/version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
     }
@@ -51,7 +51,7 @@ public static class ABHelper
     {
         SetBundleNameAll();
 
-        string dir = Helper.CheckPathExistence(PathDefine.buildABPathAndroid);
+        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Android") + "AssetsBundle");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);

@@ -67,22 +67,60 @@ public class Launcher : MonoBehaviour
 
 
 
-
-        //tasks[0] = (cb) =>
-        // {
-        //     WWWForm wwwForm = new WWWForm();
-        //     wwwForm.headers.Add("headersKey", "headersValue");
-        //     byte[] byteArray1 = System.Text.Encoding.UTF8.GetBytes("ddd");
-        //     wwwForm.AddBinaryData("2222", byteArray1);
-        //     NetWorkManager.Instance.PostWebMSG("http://192.168.1.175/GetVersion:8080/", wwwForm, (www) =>
-        //     {
-        //         Debug.LogError(www.text);
-        //         cb((int)LocalCode.SUCCESS);
-        //     });
-        // };
-        //return;
-
         System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[2];
+
+        Action<int> finalCb = (code) =>
+        {
+            if (code == (int)LocalCode.SUCCESS)
+            {
+                Debug.Log("热更流程" + (LocalCode)code);
+            }
+            else
+            {
+                Debug.LogError("热更流程" + (LocalCode)code);
+            }
+        };
+
+        tasks[0] = (cb) =>
+        {
+            //获取当前可升级到的版本（模拟访问PHP返回数据） 现在并不需要对数据做任何处理
+            WWWForm wwwForm = new WWWForm();
+            wwwForm.headers.Add("headersKey", "headersValue");
+            byte[] byteArray = System.Text.Encoding.UTF8.GetBytes("getVersion");
+            wwwForm.AddBinaryData(byteArray.ToString(), byteArray);
+            Debug.Log("请求服务器下发可运行版本 --- ");
+            NetWorkManager.Instance.PostWebMSG("http://192.168.1.175/GetVersion:8080/", wwwForm, (www) =>
+            {
+                Debug.Log("收到服务器下发可运行版本 --- " + www.text);
+                cb((int)LocalCode.SUCCESS);
+            });
+        };
+
+        tasks[1] = (cb) =>
+        {
+            //拿到服务器版本之后去CDN（即本地服务器的AssetsBundle目录）
+        };
+
+
+        AsyncHelper asyncHelper = new AsyncHelper();
+        asyncHelper.Waterfall(tasks, finalCb);
+
+
+        return;
+
+        //获取服务器上的AllPackageVersion.json
+
+       //s NetWorkManager.Instance.Download(PathDefine.serverPath() + "AssetsBundle/AllPackageVersion.json",
+            //(content) =>
+           // {
+            //    int a = 0;
+           // });
+
+
+
+
+        return;
+
 
         tasks[0] = (cb) =>
         {
@@ -107,13 +145,7 @@ public class Launcher : MonoBehaviour
             //Debug.LogError();
         };
 
-        Action<int> finalCb = (code) =>
-        {
-            Debug.LogError((LocalCode)code);
-        };
 
-        AsyncHelper asyncHelper = new AsyncHelper();
-        asyncHelper.Waterfall(tasks, finalCb);
 
         return;
         string url = serverPath + "/version.json";
@@ -157,8 +189,8 @@ public class Launcher : MonoBehaviour
                 }
 
                 //保存当前这份最新的文件
-                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
-                Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray);
+                // byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
+                // Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray);
             }
 
             if (shouldDownloadList.Count > 0)

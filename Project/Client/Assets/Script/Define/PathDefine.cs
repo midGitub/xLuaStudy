@@ -6,49 +6,28 @@
 public class PathDefine
 {
     #region local
-    /// <summary>
-    /// 编辑器AB包路径
-    /// </summary>
-    public static string buildABPathEditor = Application.streamingAssetsPath + "/Editor/AssetsBundle/";
-
-    /// <summary>
-    /// 编辑器Version文件路径
-    /// </summary>
-    public static string buildVersionPathEditor = Application.streamingAssetsPath + "/Editor/Version/version.json";
-
-    /// <summary>
-    /// 安卓环境AB包路径
-    /// </summary>
-    public static string buildABPathAndroid = Application.streamingAssetsPath + "/Android/AssetsBundle/";
-
-    /// <summary>
-    /// 安卓环境Version文件路径
-    /// </summary>
-    public static string buildVersionPathAndroid = Application.streamingAssetsPath + "/Android/Version/version.json";
+    public static string localABPath(string pfStr) { return Application.streamingAssetsPath + "/" + pfStr + "/"; }
     #endregion
 
     #region server
     /// <summary>
     /// 服务器地址
     /// </summary>
-    public static string serverPath = "http://192.168.1.175/";
-    public static string serverPathInLocal = "D:/LocalServer/";
+    public static string serverPath(int version, string pfStr) { return "http://192.168.1.175/AssetsBundle/" + pfStr + "/" + version + "/"; }
 
     /// <summary>
-    /// 服务器编辑器环境下AB包地址
+    /// 本地服务器地址
     /// </summary>
-    public static string serverABPathEditor(int version) { return "D:/LocalServer/AssetsBundle/" + version + "/Editor/AssetsBundle/"; }
+    /// <param name="version"></param>
+    /// <param name="pfStr"></param>
+    /// <returns></returns>
+    public static string serverPathInLocal(string pfStr, int version) { return "D:/LocalServer/AssetsBundle/" + pfStr + "/" + version + "/"; }
 
     /// <summary>
-    /// 服务器编辑器环境下Version文件地址
+    /// 各平台AllPackageVersion.json文件位置
     /// </summary>
-    public static string serverVersionPathEditor(int version) { return "D:/LocalServer/AssetsBundle/" + version + "/Editor/Version/version.json"; }
-
-    /// <summary>
-    /// 服务器编辑器环境下FileVersion文件地址
-    /// </summary>
-    public static string serverFileVersionPathEditor(int version) { return "D:/LocalServer/AssetsBundle/" + version + "/Editor/FileVersion/fileversion.json"; }
-
-
+    /// <param name="pfStr"></param>
+    /// <returns></returns>
+    public static string serverPathInLocal_AllPackageVersion(string pfStr) { return "D:/LocalServer/AssetsBundle/" + pfStr + "/" + "AllPackageVersion.json"; }
     #endregion
 }
