@@ -41,32 +41,12 @@ public class Launcher : MonoBehaviour
         serverPath = "http://192.168.1.175/AssetBundleAndroid";
           rootAssetName = "AssetBundleAndroid";
 #endif
-        //AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/Base", savePath, () =>
-        //{
-        //    AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/Base", "lua", Application.persistentDataPath);
 
-        //    AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
+        StartCoroutine(SACopyToPDCoroutine(null));
 
-        //    for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
-        //    {
-        //        byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
-        //        Helper.SaveAssetToLocalFile(savePath + "/lua/", assetBundleRequest.allAssets[i].name, byteArray, byteArray.Length);
-        //    }
-        //});
+        return;
 
-        //AssetBundleManager.Instance.DownLoadAssetsToLocalWithDependencies(serverPath, rootAssetName, "lua/View", savePath, () =>
-        //{
-        //    AssetBundle ab = AssetBundleManager.Instance.GetLoadAssetFromLocalFile(rootAssetName, "lua/View", "lua", Application.persistentDataPath);
-
-        //    AssetBundleRequest assetBundleRequest = ab.LoadAllAssetsAsync();
-
-        //    for (int i = 0; i < assetBundleRequest.allAssets.Length; i++)
-        //    {
-        //        byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(assetBundleRequest.allAssets[i].ToString());
-        //        Helper.SaveAssetToLocalFile(savePath + "/lua/", assetBundleRequest.allAssets[i].name, byteArray, byteArray.Length);
-        //    }
-        //});
-
+        int newestVersion = 0;//最新的版本号
         //LuaManager.Instance.Init();
 
         List<VersionIsNewPackage> allPackageVersionList = new List<VersionIsNewPackage>();
@@ -139,32 +119,76 @@ public class Launcher : MonoBehaviour
                         }
 
                         //todo  下载完了AllPackageVersion.json  然后判断当前版本是否是热更版本
+                        if (true == allPackageVersionList[count - 1].isNewPackage)
+                        {
+                            //不需要更新
 
+                            //判断在PC上出整包的版本是否是服务器上的最新版本，
+                            //若是 则把StreamingAssets里面的包移动到persistentDataPath
+                            //若否 则
+                            if (GameSetting.Instance.versionCode == allPackageVersionList[count - 1].version)
+                            {
 
+                            }
+                            else
+                            {
+                                cb((int)LocalCode.CurServerVerIsNewPackage);
+                            }
+                        }
+                        else
+                        {
+                            //需要更新
 
-                        cb((int)LocalCode.SUCCESS);
+                            newestVersion = (int)allPackageVersionList[count - 1].version;
+                            cb((int)LocalCode.SUCCESS);
+                        }
                     }
                     else
                     {
-                        cb((int)LocalCode.DownloadAllPackageVersionFail);
+                        cb((int)LocalCode.DownloadAllPackageVersionFault);
                     }
                 });
             }
             else
             {
-                cb((int)LocalCode.PATCHER_END);
+                cb((int)LocalCode.CurVerIsNewest);
             }
         };
 
         tasks[2] = (cb) =>
         {
 
+
+            //到达此步  已经下载完AllPackageVersion.json 
+            //下一步准备去服务器上最新的版本文件价下载AssetBundle文件
+            NetWorkManager.Instance.Download(PathDefine.serverPath(pfStr, newestVersion) + "AssetsBundle", (wwwResult) =>
+            {
+                if (wwwResult.isDone)
+                {
+                    //加载总的配置文件
+                    AssetBundleManifest ABManifest = wwwResult.assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+                    //ABManifest.GetAssetBundleHash()
+                    //获取需要加载物体的所有依赖项
+                    // string[] AllDependencies = new string[0];
+                    if (ABManifest != null)
+                    {
+                        //根据名称获取依赖项
+                        //    AllDependencies = ABManifest.GetAllDependencies(AssetName);
+                    }
+                }
+                else
+                {
+                    cb((int)LocalCode.DownloadAssetBundleFileFault);
+                }
+            });
         };
 
         AsyncHelper asyncHelper = new AsyncHelper();
         asyncHelper.Waterfall(tasks, finalCb);
 
         return;
+
         string url = serverPath + "/version.json";
 
         NetWorkManager.Instance.Download(url, (WWW www) =>
@@ -274,11 +298,13 @@ public class Launcher : MonoBehaviour
                 fsDes.Flush();
                 fsDes.Close();
             }
+            Debug.LogError("targetPath");
             www.Dispose();
         }
 
         if (cb != null)
         {
+            Debug.LogError("cccccccccccccccc");
             cb.Invoke((int)LocalCode.SUCCESS);
         }
     }
