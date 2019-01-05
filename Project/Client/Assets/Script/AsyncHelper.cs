@@ -78,7 +78,7 @@ public class AsyncHelper
 
         System.Action<int> cb = (code) =>
         {
-            if (_tasks.Count > 0 && code == 0)
+            if (_tasks.Count > 0 && code == (int)LocalCode.SUCCESS)
             {
                 _tasks[0](code);
             }
@@ -154,25 +154,3 @@ public class AsyncHelper
     private int[] _codes;
     private int _completed = 0;
 }
-
-//Sample
-//System.Action<System.Action<int>>[] tasks ={
-//    (cb)=>{
-//        Logger.Log("1111111111");
-//        TimerMgr.Instance.StartSimpleTimer(1.0f,()=>cb(0)); 
-//    },
-//    (cb)=>{
-//        Logger.Log("222222222222");
-//        TimerMgr.Instance.StartSimpleTimer(1.0f, () => cb(0));
-//    },
-//    (cb)=>{
-//        Logger.Log("3333333333333");
-//        TimerMgr.Instance.StartSimpleTimer(1.0f, () => cb(3));
-//    },
-//};
-//AsyncHelper a = new AsyncHelper();
-
-//a.Waterfall(tasks, (codes) =>
-//{
-//    Logger.Log("codes are ...{0}", codes);
-//});

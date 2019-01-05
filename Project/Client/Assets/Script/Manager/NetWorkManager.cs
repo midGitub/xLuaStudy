@@ -59,12 +59,12 @@ public class NetWorkManager : MonoBehaviour
         }
     }
 
-    public void Download(string url, Action<string> callBack)
+    public void Download(string url, Action<WWW> callBack)
     {
         StartCoroutine(postWebMsg(url, callBack));
     }
 
-    private IEnumerator postWebMsg(string url, Action<string> callBack)
+    private IEnumerator postWebMsg(string url, Action<WWW> callBack)
     {
         using (WWW www = new WWW(url))
         {
@@ -73,7 +73,7 @@ public class NetWorkManager : MonoBehaviour
             {
                 if (callBack != null)
                 {
-                    callBack.Invoke(www.text);
+                    callBack.Invoke(www);
                 }
             }
             else

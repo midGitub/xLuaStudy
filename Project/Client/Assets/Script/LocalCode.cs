@@ -6,20 +6,6 @@
     TIMEOUT,
     ASYNC_BUSY,
     NEED_TASK,
-    PATH_NOT_FOUND,
-    CANT_MOVE,
-    LOADER_BUSY,
-    OBJECT_CAST_ERR,
-    LACK_OF_COMPONENT,
-    INVALID_RES_ID,
-    INVALID_ATTR,
-    INVALID_RES_NAME,
-    INVALID_JSON,
-    PKG_OUT_OF_DATE,
-    NEED_RESTART,
-    NO_PATCHER_VALID,
-    ASSET_FAULT,
-    FILE_FAILED,
-    ASSET_READ_FATAL,
-    NET_FAILED
+    PATCHER_END,
+    DownloadAllPackageVersionFail,//下载AllPackageVersion.json文件失败
 }

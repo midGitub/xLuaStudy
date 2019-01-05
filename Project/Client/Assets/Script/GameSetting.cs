@@ -21,7 +21,10 @@ public class GameSetting : ScriptableObject
         }
     }
 
+    [Header("是否开启热更新")]
     public bool patcher;
+
+    [Header("当前整包版本")]
     public int versionCode;
 }
 

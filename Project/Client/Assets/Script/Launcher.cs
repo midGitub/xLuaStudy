@@ -5,11 +5,12 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using LitJson;
 
 public class Launcher : MonoBehaviour
 {
     private GameObject managerGroupObj;
-    private int curVersionCode = -1;
+    private int serverVersionCode = -1;
 
     private List<string> allSAFilePathList = new List<string>();
     private uint pathCount = 0;
@@ -28,12 +29,15 @@ public class Launcher : MonoBehaviour
 
         string savePath = Application.persistentDataPath;
 
+        string pfStr = string.Empty;
         string serverPath = string.Empty;
         string rootAssetName = string.Empty;
 #if UNITY_EDITOR
         serverPath = "http://192.168.1.175/AssetBundleEditor";
+        pfStr = "Editor";
         rootAssetName = "AssetBundleEditor";
 #elif !UNITY_EDITOR && UNITY_ANDROID
+        pfStr = "Android";
         serverPath = "http://192.168.1.175/AssetBundleAndroid";
           rootAssetName = "AssetBundleAndroid";
 #endif
@@ -65,9 +69,9 @@ public class Launcher : MonoBehaviour
 
         //LuaManager.Instance.Init();
 
+        List<VersionIsNewPackage> allPackageVersionList = new List<VersionIsNewPackage>();
 
-
-        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[2];
+        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[3];
 
         Action<int> finalCb = (code) =>
         {
@@ -92,65 +96,78 @@ public class Launcher : MonoBehaviour
             NetWorkManager.Instance.PostWebMSG("http://192.168.1.175/GetVersion:8080/", wwwForm, (www) =>
             {
                 Debug.Log("收到服务器下发可运行版本 --- " + www.text);
+                serverVersionCode = int.Parse(www.text);
                 cb((int)LocalCode.SUCCESS);
             });
         };
 
         tasks[1] = (cb) =>
         {
-            //拿到服务器版本之后去CDN（即本地服务器的AssetsBundle目录）
+            //拿到服务器版本之后 先判断当前版本是否需要热更(先判断presitantDataPath里面有没有这个文件，若没有 则使用GameSetting里面的VersionCode)
+            //若需要热更新 去CDN（即本地服务器的AssetsBundle目录）下载AllPackageVersion.json
+            //用于判断当前版本是整包版本还是热更版本
+
+            int localVersion = -1;
+            if (File.Exists(PathDefine.presitantABPath(pfStr) + "/version.json"))
+            {
+                VersionJsonObject versionJsonObj = Helper.LoadVersionJson(File.ReadAllText(PathDefine.presitantABPath(pfStr) + "/version.json"));
+                localVersion = (int)versionJsonObj.version;
+            }
+            else
+            {
+                localVersion = GameSetting.Instance.versionCode;
+            }
+
+            if (serverVersionCode > localVersion)//判断版本
+            {
+                NetWorkManager.Instance.Download(PathDefine.serverPath(pfStr) + "AllPackageVersion.json", (www) =>
+                {
+                    if (string.IsNullOrEmpty(www.error))
+                    {
+                        JsonData jsonData = JsonMapper.ToObject(www.text);
+                        int count = jsonData.Count;
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            JsonData verIsNewPkgJD = jsonData[i];
+
+                            VersionIsNewPackage vinp = new VersionIsNewPackage();
+                            vinp.version = uint.Parse(verIsNewPkgJD["Version"].ToJson());
+                            vinp.isNewPackage = bool.Parse(verIsNewPkgJD["isNewPackage"].ToJson());
+
+                            allPackageVersionList.Add(vinp);
+                        }
+
+                        //todo  下载完了AllPackageVersion.json  然后判断当前版本是否是热更版本
+
+
+
+                        cb((int)LocalCode.SUCCESS);
+                    }
+                    else
+                    {
+                        cb((int)LocalCode.DownloadAllPackageVersionFail);
+                    }
+                });
+            }
+            else
+            {
+                cb((int)LocalCode.PATCHER_END);
+            }
         };
 
+        tasks[2] = (cb) =>
+        {
+
+        };
 
         AsyncHelper asyncHelper = new AsyncHelper();
         asyncHelper.Waterfall(tasks, finalCb);
 
-
-        return;
-
-        //获取服务器上的AllPackageVersion.json
-
-       //s NetWorkManager.Instance.Download(PathDefine.serverPath() + "AssetsBundle/AllPackageVersion.json",
-            //(content) =>
-           // {
-            //    int a = 0;
-           // });
-
-
-
-
-        return;
-
-
-        tasks[0] = (cb) =>
-        {
-            string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
-            string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
-
-            for (int i = 0; i < allSAFilePathGroup.Length; i++)
-            {
-                allSAFilePathGroup[i] = allSAFilePathGroup[i].Replace("\\", "/");
-                if (!allSAFilePathGroup[i].Contains(".meta") && !allSAFilePathGroup[i].Contains(".manifest"))
-                {
-                    allSAFilePathList.Add(allSAFilePathGroup[i]);
-                }
-            }
-
-            StartCoroutine(SACopyToPDCoroutine(cb));
-        };
-
-        tasks[1] = (cb) =>
-        {
-            cb.Invoke((int)LocalCode.SUCCESS);
-            //Debug.LogError();
-        };
-
-
-
         return;
         string url = serverPath + "/version.json";
 
-        NetWorkManager.Instance.Download(url, (string content) =>
+        NetWorkManager.Instance.Download(url, (WWW www) =>
         {
             //检测persistentDataPath地址里有没有这个文件,如果有 则将其作为本地版本
             VersionJsonObject localVersion = null;
@@ -165,7 +182,7 @@ public class Launcher : MonoBehaviour
 
             string s = Resources.Load("version").ToString();
 
-            VersionJsonObject serviceVersion = Helper.LoadVersionJson(content);
+            VersionJsonObject serviceVersion = Helper.LoadVersionJson(www.text);
 
             List<string> shouldDownloadList = new List<string>();
 
