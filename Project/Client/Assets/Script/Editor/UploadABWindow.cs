@@ -220,7 +220,7 @@ public class UploadABWindow : EditorWindow
         }
         else
         {
-            string recentFileInfoText = File.ReadAllText(PathDefine.serverPathInLocal(pfStr, serverRecentVersion) + "FileVersion/fileversion.json", System.Text.Encoding.UTF8);
+            string recentFileInfoText = File.ReadAllText(PathDefine.serverPathInLocal(pfStr, serverRecentVersion) + "fileversion.json", System.Text.Encoding.UTF8);
             newFileInfoJsonData = JsonMapper.ToObject(recentFileInfoText);
 
             //检查替换
@@ -266,16 +266,44 @@ public class UploadABWindow : EditorWindow
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(verJson.ToString());
 
         //保存版本文件
-        if (File.Exists(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json"))
+        string saveFileVersionPath = PathDefine.serverPathInLocal(pfStr, version) + "fileversion.json";
+        if (File.Exists(saveFileVersionPath))
         {
-            File.Delete(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json");
+            File.Delete(saveFileVersionPath);
             AssetDatabase.Refresh();
         }
-        FileInfo verFileInfo = new FileInfo(PathDefine.serverPathInLocal(pfStr, version) + "FileVersion/fileversion.json");
+        FileInfo verFileInfo = new FileInfo(saveFileVersionPath);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(verFileInfo.Directory.FullName), verFileInfo.Name, byteArray);
 
         #endregion
 
+        #region 创建version.json文件 用于对比HASH 下载
+        JsonData versionJsonData = new JsonData() { };
+
+        versionJsonData["VersionCode"] = version;
+        versionJsonData["ABHashList"] = new JsonData();
+        for (int i = 0; i < localAllABName.Length; i++)
+        {
+            Hash128 localHash = localABManifest.GetAssetBundleHash(localAllABName[i]);
+            JsonData curABData = new JsonData();
+            curABData[localAllABName[i]] = localHash.GetHashCode();
+
+            versionJsonData["ABHashList"].Add(curABData);
+        }
+
+        //添加当前总AB文件的HASH对比
+        JsonData assetsBundleJD = new JsonData();
+        assetsBundleJD["AssetsBundle"] = localABManifest.GetHashCode();
+        versionJsonData["ABHashList"].Add(assetsBundleJD);
+
+        string json = Helper.JsonTree(versionJsonData.ToJson());
+        byte[] versionJsonByteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
+
+        //存一份version
+        string jsonSavePathLocal = PathDefine.serverPathInLocal("Editor", version) + "version.json";
+        FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, versionJsonByteArray);
+        #endregion
         Debug.Log("上传完毕");
     }
 

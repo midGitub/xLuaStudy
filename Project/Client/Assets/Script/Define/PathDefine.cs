@@ -7,7 +7,6 @@ public class PathDefine
 {
     #region local
     public static string localABPath(string pfStr) { return Application.streamingAssetsPath + "/" + pfStr + "/"; }
-
     public static string presitantABPath(string pfStr) { return Application.persistentDataPath + "/" + pfStr + "/"; }
     #endregion
 

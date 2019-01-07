@@ -29,3 +29,22 @@ public class VersionIsNewPackage
 }
 
 #endregion
+
+#region FileVersion.json 解析类
+public class FileVersionJsonObject
+{
+    public List<VersionAndSize> versionSizeList;
+
+    public FileVersionJsonObject()
+    {
+        versionSizeList = new List<VersionAndSize>();
+    }
+}
+
+public class VersionAndSize
+{
+    public string name;
+    public uint version;
+    public uint size;
+}
+#endregion

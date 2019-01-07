@@ -26,5 +26,8 @@ public class GameSetting : ScriptableObject
 
     [Header("当前整包版本")]
     public int versionCode;
+
+    [Header("是否强制开启SA到PD的复制")]
+    public bool forceCopy;
 }
 

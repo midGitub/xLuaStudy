@@ -384,5 +384,39 @@ public class Helper
 
         return versionJsonObject;
     }
+
+    public static FileVersionJsonObject LoadFileVersionJson(string data)
+    {
+        FileVersionJsonObject fileVersionJsonObject = new FileVersionJsonObject();
+
+        JsonData jsonData = JsonMapper.ToObject(data);
+
+        for (int i = 0; i < jsonData.Count; i++)
+        {
+            VersionAndSize vas = new VersionAndSize();
+            vas.name = jsonData[i]["name"].ToString();
+            vas.size = uint.Parse(jsonData[i]["info"][0]["size"].ToString());
+            vas.version = uint.Parse(jsonData[i]["info"][0]["version"].ToString());
+
+            fileVersionJsonObject.versionSizeList.Add(vas);
+        }
+        
+        return fileVersionJsonObject;
+    }
+
+    public static string GetPlatformString()
+    {
+        string pfStr = string.Empty;
+        string rootAssetName = string.Empty;
+#if UNITY_EDITOR
+        pfStr = "Editor";
+        rootAssetName = "AssetBundleEditor";
+#elif !UNITY_EDITOR && UNITY_ANDROID
+        pfStr = "Android";
+        rootAssetName = "AssetBundleAndroid";
+#endif
+
+        return pfStr;
+    }
 }
 

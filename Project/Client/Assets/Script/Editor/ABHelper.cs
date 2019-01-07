@@ -44,6 +44,8 @@ public static class ABHelper
         string jsonSavePathLocal = PathDefine.localABPath("Editor") + "Version/version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
+
+        AssetDatabase.Refresh();
     }
 
     [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]

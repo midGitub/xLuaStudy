@@ -30,28 +30,21 @@ public class Launcher : MonoBehaviour
         string savePath = Application.persistentDataPath;
 
         string pfStr = string.Empty;
-        string serverPath = string.Empty;
         string rootAssetName = string.Empty;
 #if UNITY_EDITOR
-        serverPath = "http://192.168.1.175/AssetBundleEditor";
         pfStr = "Editor";
         rootAssetName = "AssetBundleEditor";
 #elif !UNITY_EDITOR && UNITY_ANDROID
         pfStr = "Android";
-        serverPath = "http://192.168.1.175/AssetBundleAndroid";
-          rootAssetName = "AssetBundleAndroid";
+        rootAssetName = "AssetBundleAndroid";
 #endif
+        VersionIsNewPackage server_vinp = null;//服务器版本对应的包体信息
 
-        StartCoroutine(SACopyToPDCoroutine(null));
-
-        return;
-
-        int newestVersion = 0;//最新的版本号
-        //LuaManager.Instance.Init();
+        VersionJsonObject versionJsonObj = new VersionJsonObject();
 
         List<VersionIsNewPackage> allPackageVersionList = new List<VersionIsNewPackage>();
 
-        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[3];
+        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[4];
 
         Action<int> finalCb = (code) =>
         {
@@ -67,6 +60,19 @@ public class Launcher : MonoBehaviour
 
         tasks[0] = (cb) =>
         {
+            //将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
+            if (PlayerPrefs.GetInt("SACopyToPD" + GameSetting.Instance.versionCode, 0) == 0 || GameSetting.Instance.forceCopy == true)
+            {
+                StartCoroutine(SACopyToPDCoroutine(cb));
+            }
+            else
+            {
+                cb((int)LocalCode.SUCCESS);
+            }
+        };
+
+        tasks[1] = (cb) =>
+        {
             //获取当前可升级到的版本（模拟访问PHP返回数据） 现在并不需要对数据做任何处理
             WWWForm wwwForm = new WWWForm();
             wwwForm.headers.Add("headersKey", "headersValue");
@@ -81,24 +87,15 @@ public class Launcher : MonoBehaviour
             });
         };
 
-        tasks[1] = (cb) =>
+        tasks[2] = (cb) =>
         {
             //拿到服务器版本之后 先判断当前版本是否需要热更(先判断presitantDataPath里面有没有这个文件，若没有 则使用GameSetting里面的VersionCode)
             //若需要热更新 去CDN（即本地服务器的AssetsBundle目录）下载AllPackageVersion.json
             //用于判断当前版本是整包版本还是热更版本
+            string versionPath = PathDefine.presitantABPath(pfStr) + "Version/version.json";
+            versionJsonObj = Helper.LoadVersionJson(File.ReadAllText(versionPath));
 
-            int localVersion = -1;
-            if (File.Exists(PathDefine.presitantABPath(pfStr) + "/version.json"))
-            {
-                VersionJsonObject versionJsonObj = Helper.LoadVersionJson(File.ReadAllText(PathDefine.presitantABPath(pfStr) + "/version.json"));
-                localVersion = (int)versionJsonObj.version;
-            }
-            else
-            {
-                localVersion = GameSetting.Instance.versionCode;
-            }
-
-            if (serverVersionCode > localVersion)//判断版本
+            if (serverVersionCode > versionJsonObj.version)//判断服务器版本是否大于当前版本
             {
                 NetWorkManager.Instance.Download(PathDefine.serverPath(pfStr) + "AllPackageVersion.json", (www) =>
                 {
@@ -118,29 +115,42 @@ public class Launcher : MonoBehaviour
                             allPackageVersionList.Add(vinp);
                         }
 
-                        //todo  下载完了AllPackageVersion.json  然后判断当前版本是否是热更版本
-                        if (true == allPackageVersionList[count - 1].isNewPackage)
+                        // 下载完了AllPackageVersion.json 
+                        // 根据服务器下发的版本去资源库取对应版本资源
+                        // 资源库里面有一个文件记录当前版本是否热更版本的文件
+                        // 然后判断当前资源库版本是否是热更版本
+
+                        server_vinp = allPackageVersionList.Find(t => t.version == serverVersionCode);
+
+                        if (server_vinp != null)
                         {
-                            //不需要更新
-
-                            //判断在PC上出整包的版本是否是服务器上的最新版本，
-                            //若是 则把StreamingAssets里面的包移动到persistentDataPath
-                            //若否 则
-                            if (GameSetting.Instance.versionCode == allPackageVersionList[count - 1].version)
+                            if (true == server_vinp.isNewPackage)
                             {
+                                //不需要更新
 
+                                //GameSetting.Instance.versionCode 这个值是在出包的时候设置的
+                                //判断在PC上出整包的版本是否是服务器上的最新版本
+                                if (GameSetting.Instance.versionCode == serverVersionCode)
+                                {
+                                    cb((int)LocalCode.PATCHER_END);
+                                }
+                                else
+                                {
+                                    //需要换包
+                                    cb((int)LocalCode.CurServerVerIsNewPackage);
+                                }
                             }
                             else
                             {
-                                cb((int)LocalCode.CurServerVerIsNewPackage);
+                                //需要更新
+
+                                cb((int)LocalCode.SUCCESS);
                             }
                         }
                         else
                         {
-                            //需要更新
-
-                            newestVersion = (int)allPackageVersionList[count - 1].version;
-                            cb((int)LocalCode.SUCCESS);
+                            //在资源库中找不到对应版本资源
+                            cb((int)LocalCode.CanNotFindVersionInCDN);
                         }
                     }
                     else
@@ -155,98 +165,96 @@ public class Launcher : MonoBehaviour
             }
         };
 
-        tasks[2] = (cb) =>
+        tasks[3] = (cb) =>
         {
-
-
             //到达此步  已经下载完AllPackageVersion.json 
-            //下一步准备去服务器上最新的版本文件价下载AssetBundle文件
-            NetWorkManager.Instance.Download(PathDefine.serverPath(pfStr, newestVersion) + "AssetsBundle", (wwwResult) =>
-            {
-                if (wwwResult.isDone)
-                {
-                    //加载总的配置文件
-                    AssetBundleManifest ABManifest = wwwResult.assetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            //下一步准备去服务器上最新的版本文件价下载version.json文件
+            //对比哪些文件需要下载
 
-                    //ABManifest.GetAssetBundleHash()
-                    //获取需要加载物体的所有依赖项
-                    // string[] AllDependencies = new string[0];
-                    if (ABManifest != null)
-                    {
-                        //根据名称获取依赖项
-                        //    AllDependencies = ABManifest.GetAllDependencies(AssetName);
-                    }
-                }
-                else
+            NetWorkManager.Instance.Download(PathDefine.serverPath(pfStr, serverVersionCode) + "version.json", (WWW www) =>
+            {
+                VersionJsonObject serverVersionJson = Helper.LoadVersionJson(www.text);
+
+                List<string> shouldDownloadList = new List<string>();
+
+                if (serverVersionJson.version > versionJsonObj.version)//服务器版本大于本地版本
                 {
-                    cb((int)LocalCode.DownloadAssetBundleFileFault);
+                    //下面检测该下哪些Bundle
+                    foreach (ABNameHash singleServiceNameHash in serverVersionJson.ABHashList)
+                    {
+                        ABNameHash singleLocalNameHash = versionJsonObj.ABHashList.Find(t => t.abName == singleServiceNameHash.abName);
+                        if (singleLocalNameHash != null)
+                        {
+                            if (singleLocalNameHash.hashCode != singleServiceNameHash.hashCode)
+                            {
+                                shouldDownloadList.Add(singleServiceNameHash.abName);
+                            }
+                        }
+                        else
+                        {
+                            shouldDownloadList.Add(singleServiceNameHash.abName);
+                        }
+                    }
+
+                    //保存当前这份最新的 version.json 文件
+                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(www.text);
+                    Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(pfStr), "Version/version.json", byteArray);
                 }
+
+                if (shouldDownloadList.Count > 0)
+                {
+                    //拿到对应的fileversion  然后取版本号
+                    //取到版本号之后开始从资源库上对应文件夹下载资源
+                    string fileVersionPath = PathDefine.serverPath(pfStr, serverVersionCode) + "fileversion.json";
+                    NetWorkManager.Instance.Download(fileVersionPath, (WWW wwwResult) =>
+                    {
+                        if (string.IsNullOrEmpty(wwwResult.error))
+                        {
+                            FileVersionJsonObject fileVersionJsonObject = Helper.LoadFileVersionJson(wwwResult.text);
+
+                            List<VersionAndSize> vasList = new List<VersionAndSize>();
+                            foreach (string name in shouldDownloadList)
+                            {
+                                VersionAndSize vas = fileVersionJsonObject.versionSizeList.Find(t => t.name == name);
+                                vasList.Add(vas);
+                            }
+
+                            AssetBundleManager.Instance.DownLoadAssetBundleByList(vasList, pfStr, cb);
+                        }
+                        else
+                        {
+                            cb((int)LocalCode.DownloadFileVersionJsonFault);
+                        }
+                    });
+                }
+
+
             });
         };
 
         AsyncHelper asyncHelper = new AsyncHelper();
         asyncHelper.Waterfall(tasks, finalCb);
-
-        return;
-
-        string url = serverPath + "/version.json";
-
-        NetWorkManager.Instance.Download(url, (WWW www) =>
-        {
-            //检测persistentDataPath地址里有没有这个文件,如果有 则将其作为本地版本
-            VersionJsonObject localVersion = null;
-            if (File.Exists(Application.persistentDataPath + "/version.json"))
-            {
-                localVersion = Helper.LoadVersionJson(File.ReadAllText(Application.persistentDataPath + "/version.json"));
-            }
-            else
-            {
-                localVersion = Helper.LoadVersionJson(Resources.Load("version").ToString());
-            }
-
-            string s = Resources.Load("version").ToString();
-
-            VersionJsonObject serviceVersion = Helper.LoadVersionJson(www.text);
-
-            List<string> shouldDownloadList = new List<string>();
-
-            if (serviceVersion.version > localVersion.version)//服务器版本大于本地版本
-            {
-                //下面检测该下哪些Bundle
-                foreach (ABNameHash singleServiceNameHash in serviceVersion.ABHashList)
-                {
-                    ABNameHash singleLocalNameHash = localVersion.ABHashList.Find(t => t.abName == singleServiceNameHash.abName);
-                    if (singleLocalNameHash != null)
-                    {
-                        if (singleLocalNameHash.hashCode != singleServiceNameHash.hashCode)
-                        {
-                            shouldDownloadList.Add(singleServiceNameHash.abName);
-                        }
-                    }
-                    else
-                    {
-                        shouldDownloadList.Add(singleServiceNameHash.abName);
-                    }
-                }
-
-                //保存当前这份最新的文件
-                // byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(content);
-                // Helper.SaveAssetToLocalFile(Application.persistentDataPath, "version.json", byteArray);
-            }
-
-            if (shouldDownloadList.Count > 0)
-            {
-                AssetBundleManager.Instance.DownLoadAssetBundleByList(shouldDownloadList);
-            }
-        });
     }
+
 
     /// <summary>
     /// 将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
     /// 为什么不直接用io函数拷贝，原因在于streaming目录不支持，
     /// </summary>
-    IEnumerator SACopyToPDCoroutine(Action<int> cb)
+    private IEnumerator SACopyToPDCoroutine(Action<int> cb)
     {
+        string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
+        string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
+
+        for (int i = 0; i < allSAFilePathGroup.Length; i++)
+        {
+            allSAFilePathGroup[i] = allSAFilePathGroup[i].Replace("\\", "/");
+            if (!allSAFilePathGroup[i].Contains(".meta") && !allSAFilePathGroup[i].Contains(".manifest"))
+            {
+                allSAFilePathList.Add(allSAFilePathGroup[i]);
+            }
+        }
+
         List<string>.Enumerator enumerator = allSAFilePathList.GetEnumerator();
         int curIndexInAllSAFilePathList = 0;
         while (enumerator.MoveNext() == true)
@@ -284,7 +292,7 @@ public class Launcher : MonoBehaviour
                 Debug.Log("SACopyToPDCoroutine Error:" + www.error);
                 if (cb != null)
                 {
-                    cb.Invoke((int)LocalCode.FAILED);
+                    cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
                 }
             }
             else
@@ -298,13 +306,12 @@ public class Launcher : MonoBehaviour
                 fsDes.Flush();
                 fsDes.Close();
             }
-            Debug.LogError("targetPath");
             www.Dispose();
         }
 
+        PlayerPrefs.SetInt("SACopyToPD" + GameSetting.Instance.versionCode, 1);
         if (cb != null)
         {
-            Debug.LogError("cccccccccccccccc");
             cb.Invoke((int)LocalCode.SUCCESS);
         }
     }

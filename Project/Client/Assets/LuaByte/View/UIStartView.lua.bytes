@@ -1,6 +1,6 @@
 UIStartView = {}
 local this = UIStartView
-
+local a
 local transform
 local gameObject
 function UIStartView.Awake(obj)
