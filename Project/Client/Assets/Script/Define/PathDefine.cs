@@ -23,13 +23,13 @@ public class PathDefine
     /// <param name="version"></param>
     /// <param name="pfStr"></param>
     /// <returns></returns>
-    public static string serverPathInLocal(string pfStr, int version) { return "D:/LocalServer/AssetsBundle/" + pfStr + "/" + version + "/"; }
+    public static string serverPathInLocal(string pfStr, int version) { return "../Server/AssetsBundle/" + pfStr + "/" + version + "/"; }
 
     /// <summary>
     /// 各平台AllPackageVersion.json文件位置
     /// </summary>
     /// <param name="pfStr"></param>
     /// <returns></returns>
-    public static string serverPathInLocal_AllPackageVersion(string pfStr) { return "D:/LocalServer/AssetsBundle/" + pfStr + "/" + "AllPackageVersion.json"; }
+    public static string serverPathInLocal_AllPackageVersion(string pfStr) { return "../Server/AssetsBundle/" + pfStr + "/" + "AllPackageVersion.json"; }
     #endregion
 }
