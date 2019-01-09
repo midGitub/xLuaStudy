@@ -25,7 +25,7 @@ public class Launcher : MonoBehaviour
     {
         GameObject canvas = GameObject.Find("Canvas");
 
-        uiLoadingView = canvas.transform.FindChild("UILoadingView").GetComponent<UILoadingView>();
+        uiLoadingView = canvas.transform.Find("UILoadingView").GetComponent<UILoadingView>();
 
         string savePath = Application.persistentDataPath;
 
