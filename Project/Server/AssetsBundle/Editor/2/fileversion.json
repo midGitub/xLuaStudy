@@ -1,27 +1,27 @@
 [
 	{"name":"lua/base",
 	"info":[
-		{"version":0,
-		"size":2476}
+		{"version":2,
+		"size":2502}
 	]},
 	{"name":"lua/view",
 	"info":[
-		{"version":0,
-		"size":1458}
+		{"version":2,
+		"size":1477}
 	]},
 	{"name":"view/uirootview.prefab.unity3d",
 	"info":[
-		{"version":0,
-		"size":4815}
+		{"version":2,
+		"size":5649}
 	]},
 	{"name":"view/uistartview.prefab.unity3d",
 	"info":[
-		{"version":0,
-		"size":5752}
+		{"version":2,
+		"size":6541}
 	]},
 	{"name":"AssetsBundle",
 	"info":[
 		{"version":2,
-		"size":1061}
+		"size":1097}
 	]}
 ]

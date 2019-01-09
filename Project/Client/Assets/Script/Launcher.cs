@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEditor;
 using UnityEngine;
 
 public class Launcher : MonoBehaviour
@@ -19,7 +20,7 @@ public class Launcher : MonoBehaviour
         }
         else
         {
-
+            Init();
         }
     }
 
@@ -30,35 +31,15 @@ public class Launcher : MonoBehaviour
     private void CheckPatcherEnd(int code)
     {
         Debug.Log("热更流程" + (LocalCode)code);
-        switch ((LocalCode)code)
+
+        if (code == (int)LocalCode.SUCCESS || code == (int)LocalCode.CurVerIsNewest)
         {
-            case LocalCode.SUCCESS:
-                break;
-            case LocalCode.FAILED:
-                break;
-            case LocalCode.PATCHER_END:
-                break;
-            case LocalCode.CurVerIsNewest:
-                break;
-            case LocalCode.DownloadAllPackageVersionFault:
-                break;
-            case LocalCode.CurServerVerIsNewPackage:
-                break;
-            case LocalCode.DownloadVersionJsonFault:
-                break;
-            case LocalCode.DownloadAssetBundleFileFault:
-                break;
-            case LocalCode.SACopyToPDCoroutineSuccess:
-                break;
-            case LocalCode.SACopyToPDCoroutineFault:
-                break;
-            case LocalCode.CanNotFindVersionInCDN:
-                break;
-            case LocalCode.DownloadFileVersionJsonFault:
-                break;
-            default:
-                Debug.LogError("热更流程" + (LocalCode)code);
-                break;
+            Init();
         }
+    }
+
+    public void Init()
+    {
+        LuaManager.Instance.Init();
     }
 }

@@ -19,7 +19,7 @@ public static class ABHelper
         }
         BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
-
+        
         string[] allAssetBundlesName = manifest.GetAllAssetBundles();
 
         JsonData allJsonData = new JsonData() { };
