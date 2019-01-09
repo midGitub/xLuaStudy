@@ -120,8 +120,6 @@ public class Helper
         return (firstFileLine == secondFileLine);
     }
 
-
-
     #region JSON
     /// <summary>
     /// JSON字符串格式化
@@ -419,6 +417,19 @@ public class Helper
 #endif
 
         return pfStr;
+    }
+
+    public static string GetStreamingPathPre()
+    {
+        string pre = string.Empty;
+#if UNITY_EDITOR
+        pre = "file://";
+#elif UNITY_ANDROID
+        pre = "";
+#elif UNITY_IPHONE
+	    pre = "file://";
+#endif
+        return pre;
     }
 }
 

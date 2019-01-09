@@ -43,7 +43,7 @@ namespace GameServer
 
             using (Stream output = response.OutputStream)  //发送回复
             {
-                string FilePath = "D:/LocalServer/GetVersion/version";
+                string FilePath = "E:/UnityProject/Personal/xLuaStudy/Project/Server/GetVersion/version";
                 string content = File.ReadAllText(FilePath);
                 byte[] buffer = Encoding.UTF8.GetBytes(content);
                 output.Write(buffer, 0, buffer.Length);
