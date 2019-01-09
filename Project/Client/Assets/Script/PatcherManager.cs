@@ -43,7 +43,7 @@ public class PatcherManager : MonoBehaviour
     /// 当前服务器版本
     /// </summary>
     public int serverVersionCode = -1;
-    
+
     private UILoadingView uiLoadingView;
     public void Awake()
     {
@@ -170,6 +170,7 @@ public class PatcherManager : MonoBehaviour
             }
             else
             {
+                //当前版本已是最新 无需更新
                 cb((int)LocalCode.CurVerIsNewest);
             }
         };

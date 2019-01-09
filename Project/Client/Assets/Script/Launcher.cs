@@ -13,18 +13,52 @@ public class Launcher : MonoBehaviour
 
     private void Start()
     {
-        PatcherManager.Instance.Check(CheckPatcherEnd);
-    }
-
-    private void CheckPatcherEnd(int code)
-    {
-        if (code == (int)LocalCode.SUCCESS)
+        if (GameSetting.Instance.patcher)
         {
-            Debug.Log("热更流程" + (LocalCode)code);
+            PatcherManager.Instance.Check(CheckPatcherEnd);
         }
         else
         {
-            Debug.LogError("热更流程" + (LocalCode)code);
+
+        }
+    }
+
+    /// <summary>
+    /// 检查热更完成回调
+    /// </summary>
+    /// <param name="code"></param>
+    private void CheckPatcherEnd(int code)
+    {
+        Debug.Log("热更流程" + (LocalCode)code);
+        switch ((LocalCode)code)
+        {
+            case LocalCode.SUCCESS:
+                break;
+            case LocalCode.FAILED:
+                break;
+            case LocalCode.PATCHER_END:
+                break;
+            case LocalCode.CurVerIsNewest:
+                break;
+            case LocalCode.DownloadAllPackageVersionFault:
+                break;
+            case LocalCode.CurServerVerIsNewPackage:
+                break;
+            case LocalCode.DownloadVersionJsonFault:
+                break;
+            case LocalCode.DownloadAssetBundleFileFault:
+                break;
+            case LocalCode.SACopyToPDCoroutineSuccess:
+                break;
+            case LocalCode.SACopyToPDCoroutineFault:
+                break;
+            case LocalCode.CanNotFindVersionInCDN:
+                break;
+            case LocalCode.DownloadFileVersionJsonFault:
+                break;
+            default:
+                Debug.LogError("热更流程" + (LocalCode)code);
+                break;
         }
     }
 }
