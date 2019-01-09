@@ -44,11 +44,13 @@ public class Helper
     /// <returns></returns>
     public static string CheckPathExistence(string path)
     {
+#if UNITY_EDITOR
         if (!Directory.Exists(path))
         {
             Directory.CreateDirectory(path);
             AssetDatabase.Refresh();
         }
+#endif
         return path;
     }
 
@@ -400,7 +402,7 @@ public class Helper
 
             fileVersionJsonObject.versionSizeList.Add(vas);
         }
-        
+
         return fileVersionJsonObject;
     }
 
