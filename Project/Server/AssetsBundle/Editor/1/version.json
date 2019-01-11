@@ -1,8 +1,8 @@
 {"VersionCode":1,
 "ABHashList":[
-	{"lua/base":-1619690316},
-	{"lua/view":1895346412},
-	{"view/uirootview.prefab.unity3d":1735208756},
-	{"view/uistartview.prefab.unity3d":-291777844},
-	{"AssetsBundle":10834}
+	{"lua/base":769724843},
+	{"lua/view":1069487819},
+	{"view/uirootview.prefab.unity3d":-1362586854},
+	{"view/uistartview.prefab.unity3d":1198856318},
+	{"AssetsBundle":13440}
 ]}

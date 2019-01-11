@@ -19,7 +19,7 @@ public static class ABHelper
         }
         BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.StandaloneWindows64);
-        
+
         string[] allAssetBundlesName = manifest.GetAllAssetBundles();
 
         JsonData allJsonData = new JsonData() { };
@@ -52,14 +52,40 @@ public static class ABHelper
     public static void BuildAssetBundleLocalAndroid()
     {
         SetBundleNameAll();
-
-        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Android") + "AssetsBundle");
+        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Android") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
         }
         BuildAssetBundleOptions options = BuildAssetBundleOptions.DeterministicAssetBundle;
         AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(dir, options, BuildTarget.Android);
+
+        string[] allAssetBundlesName = manifest.GetAllAssetBundles();
+
+        JsonData allJsonData = new JsonData() { };
+
+        allJsonData["VersionCode"] = GameSetting.Instance.versionCode;
+        allJsonData["ABHashList"] = new JsonData();
+        for (int i = 0; i < allAssetBundlesName.Length; i++)
+        {
+            Hash128 hash = manifest.GetAssetBundleHash(allAssetBundlesName[i]);
+            int hashCode = hash.GetHashCode();
+
+            JsonData curABData = new JsonData();
+            curABData[allAssetBundlesName[i]] = hashCode;
+
+            allJsonData["ABHashList"].Add(curABData);
+        }
+
+        string json = Helper.JsonTree(allJsonData.ToJson());
+        byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
+
+        //存一份version
+        string jsonSavePathLocal = PathDefine.localABPath("Android") + "Version/version.json";
+        FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
+        Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
+
+        AssetDatabase.Refresh();
     }
 
     #region 设置AssetBundleName

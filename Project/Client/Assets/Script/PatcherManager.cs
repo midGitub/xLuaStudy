@@ -250,8 +250,12 @@ public class PatcherManager : MonoBehaviour
     /// </summary>
     private IEnumerator SACopyToPDCoroutine(Action<int> cb)
     {
-        string[] sPath = Directory.GetFiles(Application.streamingAssetsPath);
+#if UNITY_EDITOR
         string[] allSAFilePathGroup = Helper.GetFiles(Application.streamingAssetsPath, null, true, true);
+#elif UNITY_ANDROID
+        string[] allSAFilePathGroup = Helper.GetFiles( "jar:file://" + Application.dataPath + "!/assets/", null, true, true);
+#endif
+
 
         for (int i = 0; i < allSAFilePathGroup.Length; i++)
         {

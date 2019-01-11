@@ -14,6 +14,12 @@ public class Launcher : MonoBehaviour
 
     private void Start()
     {
+        AndroidActivity aa = new AndroidActivity();
+        int n1 = aa.add(12, 54);
+        int n2 = aa.add(1, 54);
+
+        Debug.LogError(n1 + "    " + n2);
+        return;
         if (GameSetting.Instance.patcher)
         {
             PatcherManager.Instance.Check(CheckPatcherEnd);

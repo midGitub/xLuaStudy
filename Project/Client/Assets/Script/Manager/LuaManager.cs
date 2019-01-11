@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using XLua;
 
+[CSharpCallLua]
 public class LuaManager : MonoBehaviour
 {
     private static LuaManager instance;
@@ -55,7 +56,7 @@ public class LuaManager : MonoBehaviour
             luaFilePath = "Assets/Lua/";
         }
 #elif UNITY_ANDROID && !UNITY_EDITOR
-         luaFilePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/lua";
+              luaFilePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile";
 #endif
     }
 

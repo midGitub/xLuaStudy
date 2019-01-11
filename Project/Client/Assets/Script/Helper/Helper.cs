@@ -410,10 +410,8 @@ public class Helper
         string rootAssetName = string.Empty;
 #if UNITY_EDITOR
         pfStr = "Editor";
-        rootAssetName = "AssetBundleEditor";
 #elif !UNITY_EDITOR && UNITY_ANDROID
         pfStr = "Android";
-        rootAssetName = "AssetBundleAndroid";
 #endif
 
         return pfStr;
