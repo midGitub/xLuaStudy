@@ -6,7 +6,37 @@
 public class PathDefine
 {
     #region local
-    public static string localABPath(string pfStr) { return Application.streamingAssetsPath + "/" + pfStr + "/"; }
+
+    /// <summary>
+    /// 真机环境调用这个
+    /// </summary>
+    /// <param name="pfStr"></param>
+    /// <returns></returns>
+    public static string StreamingAssetsPathByPF(string pfStr)
+    {
+        string path = string.Empty;
+
+        if (pfStr == "Editor")
+        {
+            path = Application.streamingAssetsPath + "/" + pfStr + "/";
+        }
+        else if (pfStr == "Android")
+        {
+            path = "jar:file://" + Application.dataPath + "!/assets/Android/";
+        }
+        return path;
+    }
+
+    /// <summary>
+    /// 打包环境调用这个
+    /// </summary>
+    /// <param name="pfStr"></param>
+    /// <returns></returns>
+    public static string StreamingAssetsPath(string pfStr)
+    {
+        return Application.streamingAssetsPath + "/" + pfStr + "/";
+    }
+
     public static string presitantABPath(string pfStr) { return Application.persistentDataPath + "/" + pfStr + "/"; }
     #endregion
 

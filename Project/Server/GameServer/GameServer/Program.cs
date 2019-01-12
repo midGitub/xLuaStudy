@@ -29,7 +29,7 @@ namespace GameServer
 
         static void GetContext(IAsyncResult ar)
         {
-            Console.WriteLine("收到请求:" + ar);
+
             HttpListener httpListener = ar.AsyncState as HttpListener;
             HttpListenerContext context = httpListener.EndGetContext(ar);  //接收到的请求context（一个环境封装体）
 
@@ -47,6 +47,9 @@ namespace GameServer
                 string content = File.ReadAllText(FilePath);
                 byte[] buffer = Encoding.UTF8.GetBytes(content);
                 output.Write(buffer, 0, buffer.Length);
+
+                Console.WriteLine("收到请求:" + DateTime.Now);
+                Console.WriteLine("返回结果:" + content + "\n");
             }
         }
     }

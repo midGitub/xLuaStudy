@@ -2,21 +2,21 @@
 	{"name":"lua/base",
 	"info":[
 		{"version":2,
-		"size":2502}
+		"size":2495}
 	]},
 	{"name":"lua/view",
 	"info":[
-		{"version":2,
+		{"version":0,
 		"size":1477}
 	]},
 	{"name":"view/uirootview.prefab.unity3d",
 	"info":[
-		{"version":2,
+		{"version":0,
 		"size":5649}
 	]},
 	{"name":"view/uistartview.prefab.unity3d",
 	"info":[
-		{"version":2,
+		{"version":0,
 		"size":6541}
 	]},
 	{"name":"AssetsBundle",

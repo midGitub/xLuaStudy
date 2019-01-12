@@ -12,7 +12,7 @@ public static class ABHelper
     public static void BuildAssetBundleEditor()
     {
         SetBundleNameAll();
-        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Editor") + "AssetsBundle/");
+        string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
@@ -37,11 +37,16 @@ public static class ABHelper
             allJsonData["ABHashList"].Add(curABData);
         }
 
+        //总AssetBundle数据 手动加上
+        JsonData assetBundleABData = new JsonData();
+        assetBundleABData["AssetsBundle"] = manifest.GetHashCode();
+        allJsonData["ABHashList"].Add(assetBundleABData);
+
         string json = Helper.JsonTree(allJsonData.ToJson());
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
         //存一份version
-        string jsonSavePathLocal = PathDefine.localABPath("Editor") + "Version/version.json";
+        string jsonSavePathLocal = PathDefine.StreamingAssetsPath("Editor") + "Version/version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
 
@@ -52,7 +57,7 @@ public static class ABHelper
     public static void BuildAssetBundleLocalAndroid()
     {
         SetBundleNameAll();
-        string dir = Helper.CheckPathExistence(PathDefine.localABPath("Android") + "AssetsBundle/");
+        string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPath("Android") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
@@ -81,7 +86,7 @@ public static class ABHelper
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
         //存一份version
-        string jsonSavePathLocal = PathDefine.localABPath("Android") + "Version/version.json";
+        string jsonSavePathLocal = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "Version/version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
 

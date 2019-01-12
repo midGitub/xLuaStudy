@@ -37,6 +37,28 @@ public class Helper
         sw.Dispose();
     }
 
+    public static void SaveAssetToLocalFile(string path, byte[] info)
+    {
+        Stream sw = null;
+        FileInfo fileInfo = new FileInfo(path);
+        Debug.LogError(path);
+        if (fileInfo.Exists)
+        {
+            fileInfo.Delete();
+        }
+        Helper.CheckPathExistence(fileInfo.Directory.FullName);
+        //如果此文件不存在则创建
+        sw = fileInfo.Create();
+        //写入
+        sw.Write(info, 0, info.Length);
+
+        sw.Flush();
+        //关闭流
+        sw.Close();
+        //销毁流
+        sw.Dispose();
+    }
+
     /// <summary>
     /// 检查文件路径是否存在，不存在则创建
     /// </summary>
@@ -423,7 +445,7 @@ public class Helper
 #if UNITY_EDITOR
         pre = "file://";
 #elif UNITY_ANDROID
-        pre = "";
+        pre = "jar:file://";
 #elif UNITY_IPHONE
 	    pre = "file://";
 #endif

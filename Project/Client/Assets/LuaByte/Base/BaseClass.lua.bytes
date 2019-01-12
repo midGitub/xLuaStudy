@@ -1,6 +1,6 @@
 --保存类类型的虚表
 local _class = {}
-
+local a;
 GLOBAL_OBJ_COUNT = {}
 ENABLE_OBJ_COUNT = 0
 

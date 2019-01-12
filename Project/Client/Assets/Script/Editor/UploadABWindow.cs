@@ -144,7 +144,7 @@ public class UploadABWindow : EditorWindow
 
         List<string> shouldMoveList = new List<string>();
 
-        AssetBundle localAssetBundle = AssetBundle.LoadFromFile(PathDefine.localABPath(pfStr) + "AssetsBundle/AssetsBundle");
+        AssetBundle localAssetBundle = AssetBundle.LoadFromFile(PathDefine.StreamingAssetsPath(pfStr) + "AssetsBundle/AssetsBundle");
         AssetBundleManifest localABManifest = localAssetBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
         localAssetBundle.Unload(false);
 
@@ -196,7 +196,7 @@ public class UploadABWindow : EditorWindow
             }
             Helper.CheckPathExistence(needCheckDirectoryPath);
 
-            byte[] fileByte = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
+            byte[] fileByte = File.ReadAllBytes(PathDefine.StreamingAssetsPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
 
             FileStream fsDes = File.Create(targetPath);
             fsDes.Write(fileByte, 0, fileByte.Length);
@@ -213,7 +213,7 @@ public class UploadABWindow : EditorWindow
             for (int i = 0; i < shouldMoveList.Count; i++)
             {
                 //拼接AB版本文件，用于记录每个AB的版本
-                byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
+                byte[] b = File.ReadAllBytes(PathDefine.StreamingAssetsPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
                 JsonData jd = CreteFileVersionItemJson(shouldMoveList[i], version, b.Length);
                 newFileInfoJsonData.Add(jd);
             }
@@ -231,7 +231,7 @@ public class UploadABWindow : EditorWindow
                     if (shouldMoveList[j] == newFileInfoJsonData[i]["name"].ToString())
                     {
                         //下面需要补充info
-                        byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[j]);
+                        byte[] b = File.ReadAllBytes(PathDefine.StreamingAssetsPath(pfStr) + "AssetsBundle/" + shouldMoveList[j]);
                         newFileInfoJsonData[i]["info"][0]["version"] = version;
                         newFileInfoJsonData[i]["info"][0]["size"] = b.Length;
                         break;
@@ -255,7 +255,7 @@ public class UploadABWindow : EditorWindow
 
                 if (isAdd)
                 {
-                    byte[] b = File.ReadAllBytes(PathDefine.localABPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
+                    byte[] b = File.ReadAllBytes(PathDefine.StreamingAssetsPath(pfStr) + "AssetsBundle/" + shouldMoveList[i]);
                     JsonData jd = CreteFileVersionItemJson(shouldMoveList[i], version, b.Length);
                     newFileInfoJsonData.Add(jd);
                 }
