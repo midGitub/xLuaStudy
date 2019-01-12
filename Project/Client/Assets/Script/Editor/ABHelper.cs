@@ -12,7 +12,7 @@ public static class ABHelper
     public static void BuildAssetBundleEditor()
     {
         SetBundleNameAll();
-        string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/");
+        string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPathByPF("Editor") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
         {
             Directory.CreateDirectory(dir);
@@ -53,7 +53,7 @@ public static class ABHelper
         AssetDatabase.Refresh();
     }
 
-    [MenuItem("ABHelper/BuildAssetBundleLocalAndroid", false, 1)]
+    [MenuItem("ABHelper/BuildAssetBundleAndroid", false, 1)]
     public static void BuildAssetBundleLocalAndroid()
     {
         SetBundleNameAll();

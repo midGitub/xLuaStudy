@@ -2,7 +2,7 @@
 	{"name":"lua/base",
 	"info":[
 		{"version":0,
-		"size":2492}
+		"size":2495}
 	]},
 	{"name":"lua/view",
 	"info":[
@@ -22,6 +22,6 @@
 	{"name":"AssetsBundle",
 	"info":[
 		{"version":2,
-		"size":1097}
+		"size":1098}
 	]}
 ]

@@ -300,7 +300,7 @@ public class UploadABWindow : EditorWindow
         byte[] versionJsonByteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
         //存一份version
-        string jsonSavePathLocal = PathDefine.serverPathInLocal("Editor", version) + "version.json";
+        string jsonSavePathLocal = PathDefine.serverPathInLocal(pfStr, version) + "version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, versionJsonByteArray);
         #endregion

@@ -35,11 +35,6 @@ public class PatcherManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 所有在StreamingAsset里面的文件路径
-    /// </summary>
-    private List<string> allSAFilePathList = new List<string>();
-
-    /// <summary>
     /// 当前版本文件
     /// </summary>
     private VersionJsonObject localVersionJsonObj = new VersionJsonObject();
@@ -85,16 +80,20 @@ public class PatcherManager : MonoBehaviour
                 path = PathDefine.StreamingAssetsPathByPF(pfStr) + "Version/version.json";
             }
 
-            WWW request = new WWW(path);
-            if (string.IsNullOrEmpty(request.error))
+            Action<WWW> DownloadCB = (request) =>
             {
-                localVersionJsonObj = Helper.LoadVersionJson(request.text);
-                cb((int)LocalCode.SUCCESS);
-            }
-            else
-            {
-                cb((int)LocalCode.DownloadVersionJsonFault);
-            }
+                if (string.IsNullOrEmpty(request.error))
+                {
+                    localVersionJsonObj = Helper.LoadVersionJson(request.text);
+                    cb((int)LocalCode.SUCCESS);
+                }
+                else
+                {
+                    cb((int)LocalCode.DownloadVersionJsonFault);
+                }
+            };
+
+            NetWorkManager.Instance.Download(path, DownloadCB);
         };
 
         tasks[1] = (cb) =>
@@ -284,31 +283,38 @@ public class PatcherManager : MonoBehaviour
         {
             string path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" +
                           enumerator.Current.abName;
-            WWW request = new WWW(path);
 
-            Debug.LogError(path);
-
-            yield return request;
-            if (string.IsNullOrEmpty(request.error))
+            using (WWW request = new WWW(path))
             {
-                string savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
-                string[] nameSplit = enumerator.Current.abName.Split('/');
+                yield return request;
+                if (string.IsNullOrEmpty(request.error))
+                {
+                    string savePath = string.Empty;
+#if UNITY_EDITOR
+                     savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
+                    Debug.Log(savePath);
+#elif UNITY_ANDROID&&!UNITY_EDITOR
+                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
+#endif
+                    string[] nameSplit = enumerator.Current.abName.Split('/');
 
-                byte[] byteArray = request.bytes;
+                    byte[] byteArray = request.bytes;
 
-                Helper.SaveAssetToLocalFile(savePath, byteArray);
+                    Helper.SaveAssetToLocalFile(savePath, byteArray);
 
-                curIndex++;
-                uiLoadingView.Refresh(curIndex, localVersionJsonObj.ABHashList.Count,
-                    "正在复制文件(从StreamingAssets至persistentDataPath)");
+                    curIndex++;
+                    uiLoadingView.Refresh(curIndex, localVersionJsonObj.ABHashList.Count,
+                        "正在复制文件(从StreamingAssets至persistentDataPath)");
+                }
+                else
+                {
+                    Debug.LogError(request.error);
+                    cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
+                }
+
+                request.Dispose();
+                Debug.Log("enumerator.Current.abName  " + enumerator.Current.abName);
             }
-            else
-            {
-                Debug.LogError(request.error);
-                cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
-            }
-            request.Dispose();
-            Debug.Log("enumerator.Current.abName  " + enumerator.Current.abName);
         }
 
         PlayerPrefs.SetInt("SACopyToPD" + GameSetting.Instance.versionCode, 1);

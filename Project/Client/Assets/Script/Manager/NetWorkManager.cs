@@ -78,7 +78,7 @@ public class NetWorkManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError(url + "----->Error");
+                Debug.LogError(url +"  "+ www.error+ "----->Error");
             }
         }
     }
