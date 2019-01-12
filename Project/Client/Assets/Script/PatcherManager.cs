@@ -73,7 +73,11 @@ public class PatcherManager : MonoBehaviour
                 File.Exists(PathDefine.presitantABPath(pfStr) + "Version/version.json");
             if (isExitsInPD)
             {
+#if UNITY_EDITOR
                 path = PathDefine.presitantABPath(pfStr) + "Version/version.json";
+#elif !UNITY_EDITOR && UNITY_ANDROID
+                path ="file://"+ PathDefine.presitantABPath(pfStr) + "Version/version.json";
+#endif
             }
             else
             {
@@ -291,9 +295,9 @@ public class PatcherManager : MonoBehaviour
                 {
                     string savePath = string.Empty;
 #if UNITY_EDITOR
-                     savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
+                    savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
                     Debug.Log(savePath);
-#elif UNITY_ANDROID&&!UNITY_EDITOR
+#elif UNITY_ANDROID && !UNITY_EDITOR
                  savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
 #endif
                     string[] nameSplit = enumerator.Current.abName.Split('/');

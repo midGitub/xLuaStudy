@@ -21,10 +21,7 @@ public class Launcher : MonoBehaviour
 
         Debug.LogError(n1 + "    " + n2);
 #endif
-        // aa.GetFile("jar:file://" + Application.dataPath + "!/assets/");
-        // StartCoroutine(testGetVersion());
-
-
+        
         if (GameSetting.Instance.patcher)
         {
             PatcherManager.Instance.Check(CheckPatcherEnd);
@@ -52,6 +49,6 @@ public class Launcher : MonoBehaviour
 
     public void Init()
     {
-        //LuaManager.Instance.Init();
+        LuaManager.Instance.Init();
     }
 }

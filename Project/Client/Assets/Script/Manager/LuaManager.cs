@@ -128,30 +128,31 @@ public class LuaManager : MonoBehaviour
 
         for (int i = 0; i < luaAssetBundlePathList.Count; i++)
         {
-            string path = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + luaAssetBundlePathList[i];
-            Debug.LogError(path);
-
-            WWW www = new WWW(path);
-            yield return www;
-            if (string.IsNullOrEmpty(www.error))
+            string path = "file://" + PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + luaAssetBundlePathList[i];
+            Debug.Log("路径  " + path);
+            using (WWW www = new WWW(path))
             {
-                AssetBundle singleAB = www.assetBundle;
-                Object[] objectList = singleAB.LoadAllAssets();
-                string[] allAssetNames = singleAB.GetAllAssetNames();
-                for (int j = 0; j < objectList.Length; j++)
+                yield return www;
+                if (string.IsNullOrEmpty(www.error))
                 {
-                    byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(objectList[j].ToString());
+                    AssetBundle singleAB = www.assetBundle;
+                    Object[] objectList = singleAB.LoadAllAssets();
+                    string[] allAssetNames = singleAB.GetAllAssetNames();
+                    for (int j = 0; j < objectList.Length; j++)
+                    {
+                        byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(objectList[j].ToString());
 
-                    string savePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile/";
+                        string savePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile/";
 
-                    string fileName = allAssetNames[j].Replace("assets/luabyte/", "").Replace(".lua.bytes", ".lua");
+                        string fileName = allAssetNames[j].Replace("assets/luabyte/", "").Replace(".lua.bytes", ".lua");
 
-                    Helper.SaveAssetToLocalFile(savePath, fileName, byteArray);
+                        Helper.SaveAssetToLocalFile(savePath, fileName, byteArray);
+                    }
                 }
-            }
-            else
-            {
-                Debug.LogError(www.error);
+                else
+                {
+                    Debug.LogError(www.error);
+                }
             }
         }
 

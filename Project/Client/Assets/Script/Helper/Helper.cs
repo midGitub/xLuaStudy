@@ -40,15 +40,12 @@ public class Helper
     public static void SaveAssetToLocalFile(string path, byte[] info)
     {
         Stream sw = null;
-        Debug.Log(111);
         FileInfo fileInfo = new FileInfo(path);
         if (fileInfo.Exists)
         {
             fileInfo.Delete();
         }
-        Debug.Log(222 + "  " + fileInfo.Directory.FullName);
         Helper.CheckPathExistence(fileInfo.Directory.FullName);
-        Debug.Log(333 + "  " + fileInfo.Directory.FullName);
         //如果此文件不存在则创建
         sw = fileInfo.Create();
         //写入

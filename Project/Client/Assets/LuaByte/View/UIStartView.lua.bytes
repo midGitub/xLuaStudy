@@ -30,4 +30,5 @@ end
 
 function UIStartView.OnStartButtonClick()
     print("OnStartButtonClick()")
+    print("当前版本 33333   看到即lua热更成功")
 end
