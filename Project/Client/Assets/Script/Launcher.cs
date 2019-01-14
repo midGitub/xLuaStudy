@@ -45,6 +45,10 @@ public class Launcher : MonoBehaviour
         {
             Init();
         }
+        else if (code == (int) LocalCode.CurServerVerIsNewPackage)
+        {
+            Debug.LogError("下版本是全新整包，需要换包");
+        }
     }
 
     public void Init()

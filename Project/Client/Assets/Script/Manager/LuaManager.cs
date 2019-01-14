@@ -49,7 +49,6 @@ public class LuaManager : MonoBehaviour
         if (GameSetting.Instance.patcher == true)//判断是否走热更AB逻辑
         {
             luaFilePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile";
-            Debug.LogError(luaFilePath);
         }
         else
         {
@@ -129,7 +128,6 @@ public class LuaManager : MonoBehaviour
         for (int i = 0; i < luaAssetBundlePathList.Count; i++)
         {
             string path = "file://" + PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + luaAssetBundlePathList[i];
-            Debug.Log("路径  " + path);
             using (WWW www = new WWW(path))
             {
                 yield return www;

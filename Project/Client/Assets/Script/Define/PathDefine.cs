@@ -8,7 +8,7 @@ public class PathDefine
     #region local
 
     /// <summary>
-    /// 真机环境调用这个
+    /// 真机环境 StreamingAssetsPath
     /// </summary>
     /// <param name="pfStr"></param>
     /// <returns></returns>
@@ -28,7 +28,7 @@ public class PathDefine
     }
 
     /// <summary>
-    /// 打包环境调用这个
+    /// 打包环境 StreamingAssetsPath
     /// </summary>
     /// <param name="pfStr"></param>
     /// <returns></returns>

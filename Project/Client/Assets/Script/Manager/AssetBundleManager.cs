@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections;
-using System.IO;
 using System.Collections.Generic;
-using System;
+using System.IO;
+using UnityEngine;
 
 public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
@@ -66,7 +66,7 @@ public class AssetBundleManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError(wwwAsset.error);
+                Debug.LogError(wwwAsset.error + "  -----  " + path);
             }
         }
 
