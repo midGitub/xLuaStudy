@@ -2,12 +2,12 @@
 	{"name":"lua/base",
 	"info":[
 		{"version":0,
-		"size":2492}
+		"size":2495}
 	]},
 	{"name":"lua/view",
 	"info":[
 		{"version":0,
-		"size":1477}
+		"size":1497}
 	]},
 	{"name":"view/uirootview.prefab.unity3d",
 	"info":[
@@ -22,6 +22,6 @@
 	{"name":"AssetsBundle",
 	"info":[
 		{"version":1,
-		"size":1097}
+		"size":1098}
 	]}
 ]

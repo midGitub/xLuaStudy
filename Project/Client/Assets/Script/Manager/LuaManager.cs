@@ -1,12 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 using XLua;
 
 [CSharpCallLua]
 public class LuaManager : MonoBehaviour
 {
+    #region Instance
     private static LuaManager instance;
 
     public static LuaManager Instance
@@ -34,132 +37,85 @@ public class LuaManager : MonoBehaviour
             return instance;
         }
     }
+    #endregion
 
     public static LuaEnv luaEnv;
 
-    /// <summary>
-    /// lua文件保存地址
-    /// </summary>
-    private string luaFilePath;
-    protected void Awake()
-    {
-        luaEnv = new LuaEnv();
-        luaEnv.AddLoader(LoadLuaFile);
-#if UNITY_EDITOR
-        if (GameSetting.Instance.patcher == true)//判断是否走热更AB逻辑
-        {
-            luaFilePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile";
-        }
-        else
-        {
-            luaFilePath = "Assets/Lua/";
-        }
-#elif UNITY_ANDROID && !UNITY_EDITOR
-              luaFilePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile";
-#endif
-    }
+    private Dictionary<string, byte[]> allLuaDict = new Dictionary<string, byte[]>();
 
     public void Init()
     {
-        //这里有可优化的地方 可以只解压那些修改过的LUAAssetBundle 暂不修改
-        DecompressionLuaAssetBundle();
+        LoadAllLuaAssetsBundle();
     }
 
-    private byte[] LoadLuaFile(ref string filePath)
+    private void InitLuaEnv()
     {
-        string name = filePath.ToLower();
-        byte[] byteArray = null;
+        luaEnv = new LuaEnv();
+        luaEnv.AddLoader(LoadLuaFile);
 
-        string[] allLuaPaths = Helper.GetFiles(luaFilePath, null, true);
-
-        for (int i = 0; i < allLuaPaths.Length; i++)
-        {
-            allLuaPaths[i] = allLuaPaths[i].ToLower();
-            if (!allLuaPaths[i].Contains("meta"))
-            {
-                if (allLuaPaths[i].Contains(name))
-                {
-                    byteArray = System.Text.Encoding.UTF8.GetBytes(File.ReadAllText(allLuaPaths[i]));
-                    break;
-                }
-            }
-        }
-
-        return byteArray;
-    }
-
-    /// <summary>
-    /// 解压在路径里面的Lua AssetBundle
-    /// </summary>
-    public void DecompressionLuaAssetBundle()
-    {
-        StartCoroutine(LoadLuaAssetBundle(LoadLuaAssetBundleEnd));
-    }
-
-    private void LoadLuaAssetBundleEnd()
-    {
         luaEnv.DoString("require('Main')");
         LuaFunction mainFunction = luaEnv.Global.Get<LuaFunction>("main");
         mainFunction.Call();
     }
 
-    /// <summary>
-    /// 加载lua脚本
-    /// </summary>
-    /// <param name="cb"></param>
-    /// <returns></returns>
-    public IEnumerator LoadLuaAssetBundle(System.Action cb)
+    private byte[] LoadLuaFile(ref string filePath)
     {
-        string luaABPath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/AssetsBundle";
+        string name = filePath.ToLower();
+        return allLuaDict[name];
+    }
 
-        AssetBundle ab = AssetBundle.LoadFromFile(luaABPath);
-        AssetBundleManifest manifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-        string[] allPath = manifest.GetAllAssetBundles();
-        List<string> luaAssetBundlePathList = new List<string>();
-        for (int i = 0; i < allPath.Length; i++)
+    //加载所有LUA的AB，将其内容存到字典内
+    private void LoadAllLuaAssetsBundle()
+    {
+        FileVersionJsonObject fileversion = AssetBundleManager.Instance.fileVersionJsonObject;
+        List<VersionAndSize> vasList = fileversion.versionSizeList.FindAll(t => t.name.Contains("lua/"));
+
+        int dCount = 0;
+        for (int i = 0; i < vasList.Count; i++)
         {
-            string[] split = allPath[i].Split('/');
-            if (split[0] == "lua")
+            string path = string.Empty;
+            if (vasList[i].version > GameSetting.Instance.versionCode)
             {
-                luaAssetBundlePathList.Add(allPath[i]);
+                path = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + vasList[i].name;
             }
-        }
-
-        for (int i = 0; i < luaAssetBundlePathList.Count; i++)
-        {
-            string path = "file://" + PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + luaAssetBundlePathList[i];
-            using (WWW www = new WWW(path))
+            else
             {
-                yield return www;
-                if (string.IsNullOrEmpty(www.error))
+                path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + vasList[i].name;
+            }
+
+            Action<UnityWebRequest> DownloadCB = (request) =>
+            {
+                if (request.isHttpError || request.isNetworkError)
                 {
-                    AssetBundle singleAB = www.assetBundle;
-                    Object[] objectList = singleAB.LoadAllAssets();
-                    string[] allAssetNames = singleAB.GetAllAssetNames();
+                    Debug.LogError("解压失败  ---- ");
+                }
+                else
+                {
+                    AssetBundle Bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+                    System.Object[] objectList = Bundle.LoadAllAssets();
+                    string[] allAssetNames = Bundle.GetAllAssetNames();
                     for (int j = 0; j < objectList.Length; j++)
                     {
                         byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(objectList[j].ToString());
 
-                        string savePath = PathDefine.presitantABPath(Helper.GetPlatformString()) + "LuaFile/";
+                        string fileName = allAssetNames[j].Replace("assets/luabyte/", "").Replace(".lua.bytes", "");
+                        string[] split = fileName.Split('/');
 
-                        string fileName = allAssetNames[j].Replace("assets/luabyte/", "").Replace(".lua.bytes", ".lua");
-
-                        Helper.SaveAssetToLocalFile(savePath, fileName, byteArray);
+                        allLuaDict.Add(split[1], byteArray);
                     }
                 }
-                else
-                {
-                    Debug.LogError(www.error);
-                }
-            }
-        }
 
-        if (cb != null)
-        {
-            cb.Invoke();
+                dCount++;
+                if (dCount == vasList.Count)
+                {
+                    Debug.Log("加载LUA完成");
+                    InitLuaEnv();
+                }
+            };
+            Debug.LogError(path);
+            UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
         }
     }
-
 
     private void OnDestroy()
     {

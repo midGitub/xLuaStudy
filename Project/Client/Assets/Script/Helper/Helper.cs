@@ -10,6 +10,21 @@ using UnityEngine;
 
 public class Helper
 {
+    /// <summary>
+    /// 读取文件
+    /// </summary>
+    /// <param name="fileUrl"></param>
+    /// <returns></returns>
+    public static byte[] LoadFileData(string fileUrl)
+    {
+        FileStream fs = new FileStream(fileUrl, FileMode.Open, FileAccess.Read);
+        byte[] buffur = new byte[fs.Length];
+
+        fs.Read(buffur, 0, buffur.Length);
+        fs.Close();
+        return buffur;
+    }
+
     /// 将文件模型创建到本地
     /// </summary>
     /// <param name="path"></param>
@@ -406,6 +421,11 @@ public class Helper
         return versionJsonObject;
     }
 
+    /// <summary>
+    /// 加载资源版本文件
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     public static FileVersionJsonObject LoadFileVersionJson(string data)
     {
         FileVersionJsonObject fileVersionJsonObject = new FileVersionJsonObject();
@@ -438,17 +458,14 @@ public class Helper
         return pfStr;
     }
 
-    public static string GetStreamingPathPre()
+    public static byte[] stringToByteArray(string str)
     {
-        string pre = string.Empty;
-#if UNITY_EDITOR
-        pre = "file://";
-#elif UNITY_ANDROID
-        pre = "jar:file://";
-#elif UNITY_IPHONE
-	    pre = "file://";
-#endif
-        return pre;
+        return System.Text.Encoding.Default.GetBytes(str);
+    }
+
+    public static string byteArrayToString(byte[] byteArray)
+    {
+        return System.Text.Encoding.Default.GetString(byteArray);
     }
 }
 

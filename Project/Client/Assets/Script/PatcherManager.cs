@@ -8,6 +8,7 @@ using UnityEngine.Networking;
 
 public class PatcherManager : MonoBehaviour
 {
+    #region Instance
     private static PatcherManager instance;
     public static PatcherManager Instance
     {
@@ -34,6 +35,9 @@ public class PatcherManager : MonoBehaviour
             return instance;
         }
     }
+    #endregion
+
+    public List<string> shouldDownloadList = new List<string>();
 
     /// <summary>
     /// 当前版本文件
@@ -67,7 +71,7 @@ public class PatcherManager : MonoBehaviour
 
         tasks[0] = (cb) =>
         {
-            //先用WWW加载本地version.json文件(Android环境下只能用WWW加载)
+            //先用UnityWebRequest加载本地version.json文件(Android环境下只能用WWW加载)
             //因为在复制的过程中需要用到这个文件
             string path = string.Empty;
             bool isExitsInPD = File.Exists(PathDefine.presitantABPath(pfStr) + "Version/version.json");
@@ -83,7 +87,6 @@ public class PatcherManager : MonoBehaviour
             else
             {
                 path = PathDefine.StreamingAssetsPathByPF(pfStr) + "Version/version.json";
-
             }
 
             uiLoadingView.Refresh(0, 1, "下载版本信息文件中");
@@ -97,6 +100,7 @@ public class PatcherManager : MonoBehaviour
                 }
                 else
                 {
+                    localVersionJsonObj = Helper.LoadVersionJson(request.downloadHandler.text);
                     cb((int)LocalCode.SUCCESS);
                 }
             };
@@ -106,15 +110,17 @@ public class PatcherManager : MonoBehaviour
 
         tasks[1] = (cb) =>
         {
+            cb((int)LocalCode.SUCCESS);
+
             //将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
-            if (PlayerPrefs.GetInt("SACopyToPD" + GameSetting.Instance.versionCode, 0) == 0 || GameSetting.Instance.forceCopy == true)
-            {
-                StartCoroutine(SACopyToPDCoroutine(cb));
-            }
-            else
-            {
-                cb((int)LocalCode.SUCCESS);
-            }
+            //if (PlayerPrefs.GetInt("SACopyLUAToPD" + GameSetting.Instance.versionCode, 0) == 0 || GameSetting.Instance.forceCopy == true)
+            //{
+            //    copyLua(cb);
+            //}
+            //else
+            //{
+            //    cb((int)LocalCode.SUCCESS);
+            //}
         };
 
         tasks[2] = (cb) =>
@@ -238,15 +244,13 @@ public class PatcherManager : MonoBehaviour
                 {
                     VersionJsonObject serverVersionJson = Helper.LoadVersionJson(request.downloadHandler.text);
 
-                    List<string> shouldDownloadList = new List<string>();
-
                     if (serverVersionJson.version > localVersionJsonObj.version) //服务器版本大于本地版本
                     {
                         //下面检测该下哪些Bundle
                         foreach (ABNameHash singleServiceNameHash in serverVersionJson.ABHashList)
                         {
-                            ABNameHash singleLocalNameHash =
-                                localVersionJsonObj.ABHashList.Find(t => t.abName == singleServiceNameHash.abName);
+                            VersionJsonObject aa = localVersionJsonObj;
+                            ABNameHash singleLocalNameHash = localVersionJsonObj.ABHashList.Find(t => t.abName == singleServiceNameHash.abName);
                             if (singleLocalNameHash != null)
                             {
                                 if (singleLocalNameHash.hashCode != singleServiceNameHash.hashCode)
@@ -264,6 +268,7 @@ public class PatcherManager : MonoBehaviour
                         byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(request.downloadHandler.text);
                         Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(pfStr), "Version/version.json",
                             byteArray);
+                        localVersionJsonObj = serverVersionJson;
                     }
 
                     if (shouldDownloadList.Count > 0)
@@ -281,14 +286,15 @@ public class PatcherManager : MonoBehaviour
                             }
                             else
                             {
-                                FileVersionJsonObject fileVersionJsonObject =
-                                    Helper.LoadFileVersionJson(fileVersionRequest.downloadHandler.text);
+                                FileVersionJsonObject fileVersionJsonObject = Helper.LoadFileVersionJson(fileVersionRequest.downloadHandler.text);
+                                //保存当前这份最新的 fileversion.json 文件
+                                byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(fileVersionRequest.downloadHandler.text);
+                                Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(pfStr), "FileVersion/fileversion.json", byteArray);
 
                                 List<VersionAndSize> vasList = new List<VersionAndSize>();
                                 foreach (string name in shouldDownloadList)
                                 {
-                                    VersionAndSize vas =
-                                        fileVersionJsonObject.versionSizeList.Find(t => t.name == name);
+                                    VersionAndSize vas = fileVersionJsonObject.versionSizeList.Find(t => t.name == name);
                                     vasList.Add(vas);
                                 }
 
@@ -297,6 +303,10 @@ public class PatcherManager : MonoBehaviour
                         };
 
                         UnityWebRequestManager.Instance.DownloadBuffer(fileVersionPath, DownloadFileVersionCB);
+                    }
+                    else
+                    {
+                        Debug.LogError("没有可更新的");
                     }
                 }
             };
@@ -309,52 +319,58 @@ public class PatcherManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
+    /// 将streamingAssets下的lua文件copy到从StreamingAssets至persistentDataPath
     /// 为什么不直接用io函数拷贝，原因在于streaming目录不支持，
     /// </summary>
-    private IEnumerator SACopyToPDCoroutine(Action<int> cb)
+    public void copyLua(Action<int> cb)
     {
-        List<ABNameHash>.Enumerator enumerator = localVersionJsonObj.ABHashList.GetEnumerator();
-        int curIndex = 0;
-        while (enumerator.MoveNext())
+        int dCount = 0;
+
+        List<ABNameHash> luaNameHashList = localVersionJsonObj.ABHashList.FindAll(t => t.abName.Contains("lua/"));
+
+
+        for (int i = 0; i < luaNameHashList.Count; i++)
         {
-            string path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" +
-                          enumerator.Current.abName;
+            ABNameHash cur = luaNameHashList[i];
+            string path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + cur.abName;
 
-            using (WWW request = new WWW(path))
+            Action<UnityWebRequest> DownloadCB = (request) =>
             {
-                yield return request;
-                if (string.IsNullOrEmpty(request.error))
+                if (request.isHttpError || request.isNetworkError)
                 {
-                    string savePath = string.Empty;
-#if UNITY_EDITOR
-                    savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
-#elif UNITY_ANDROID && !UNITY_EDITOR
-                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
-#endif
-                    string[] nameSplit = enumerator.Current.abName.Split('/');
-
-                    byte[] byteArray = request.bytes;
-
-                    Helper.SaveAssetToLocalFile(savePath, byteArray);
-
-                    curIndex++;
-                    uiLoadingView.Refresh(curIndex, localVersionJsonObj.ABHashList.Count,
-                        "正在复制文件(从StreamingAssets至persistentDataPath)");
+                    Debug.LogError(request.error);
+                    cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
                 }
                 else
                 {
-                    cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
+                    string savePath = string.Empty;
+#if UNITY_EDITOR
+                    savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + cur.abName;
+                    Debug.Log(savePath);
+#elif UNITY_ANDROID && !UNITY_EDITOR
+                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
+#endif
+                    string[] nameSplit = cur.abName.Split('/');
+
+                    byte[] byteArray = request.downloadHandler.data;
+
+                    Helper.SaveAssetToLocalFile(savePath, byteArray);
+
+                    dCount++;
+                    uiLoadingView.Refresh(dCount, luaNameHashList.Count, "正在复制文件(从StreamingAssets至persistentDataPath)");
+
+                    if (dCount == luaNameHashList.Count)
+                    {
+                        PlayerPrefs.SetInt("SACopyLUAToPD" + GameSetting.Instance.versionCode, 1);
+                        if (cb != null)
+                        {
+                            cb.Invoke((int)LocalCode.SUCCESS);
+                        }
+                    }
                 }
+            };
 
-                request.Dispose();
-            }
-        }
-
-        PlayerPrefs.SetInt("SACopyToPD" + GameSetting.Instance.versionCode, 1);
-        if (cb != null)
-        {
-            cb.Invoke((int)LocalCode.SUCCESS);
+            UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
         }
     }
 }

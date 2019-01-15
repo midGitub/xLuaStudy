@@ -18,4 +18,5 @@
     CanNotFindVersionInCDN = 15,//在资源库中找不到对应版本资源
     DownloadFileVersionJsonFault = 16,//下载fileversion.json文件失败
     ReqServerVersionCodeFault = 17,//向服务器请求版本号失败
+    DownloadBundleFault = 18,//下载Bundle报错
 }
