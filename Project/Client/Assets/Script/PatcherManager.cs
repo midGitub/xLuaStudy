@@ -89,7 +89,7 @@ public class PatcherManager : MonoBehaviour
                 path = PathDefine.StreamingAssetsPathByPF(pfStr) + "Version/version.json";
             }
 
-            uiLoadingView.Refresh(0, 1, "下载版本信息文件中");
+            uiLoadingView.Refresh(0, 1, "读取本地版本信息文件中");
 
             Action<UnityWebRequest> DownloadCB = (request) =>
             {
@@ -294,6 +294,7 @@ public class PatcherManager : MonoBehaviour
                                 List<VersionAndSize> vasList = new List<VersionAndSize>();
                                 foreach (string name in shouldDownloadList)
                                 {
+                                    Debug.LogError("download AB -----  " + name);
                                     VersionAndSize vas = fileVersionJsonObject.versionSizeList.Find(t => t.name == name);
                                     vasList.Add(vas);
                                 }
@@ -348,7 +349,7 @@ public class PatcherManager : MonoBehaviour
                     savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + cur.abName;
                     Debug.Log(savePath);
 #elif UNITY_ANDROID && !UNITY_EDITOR
-                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + enumerator.Current.abName;
+                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" +  cur.abName;
 #endif
                     string[] nameSplit = cur.abName.Split('/');
 

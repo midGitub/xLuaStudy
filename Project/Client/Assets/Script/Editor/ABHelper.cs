@@ -86,7 +86,7 @@ public static class ABHelper
         byte[] byteArray = System.Text.Encoding.Default.GetBytes(json.ToString());
 
         //存一份version
-        string jsonSavePathLocal = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "Version/version.json";
+        string jsonSavePathLocal = PathDefine.StreamingAssetsPath("Android") + "Version/version.json";
         FileInfo fileInfoLocal = new FileInfo(jsonSavePathLocal);
         Helper.SaveAssetToLocalFile(Helper.CheckPathExistence(fileInfoLocal.Directory.FullName), fileInfoLocal.Name, byteArray);
 

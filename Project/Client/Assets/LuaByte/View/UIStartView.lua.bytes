@@ -29,5 +29,5 @@ function UIStartView.OnDestroy()
 end
 
 function UIStartView.OnStartButtonClick()
-    print("OnStartButtonClick()  再次测试lua更新111")
+    print("OnStartButtonClick()  4444444444444")
 end

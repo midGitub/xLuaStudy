@@ -77,6 +77,11 @@ public class LuaManager : MonoBehaviour
             if (vasList[i].version > GameSetting.Instance.versionCode)
             {
                 path = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + vasList[i].name;
+#if UNITY_EDITOR
+                path = PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + vasList[i].name;
+#elif !UNITY_EDITOR && UNITY_ANDROID
+                path ="file://"+ PathDefine.presitantABPath(Helper.GetPlatformString()) + "AssetsBundle/" + vasList[i].name;
+#endif
             }
             else
             {
@@ -87,7 +92,8 @@ public class LuaManager : MonoBehaviour
             {
                 if (request.isHttpError || request.isNetworkError)
                 {
-                    Debug.LogError("解压失败  ---- ");
+                    Debug.LogError("解压失败  ---- " + request.url);
+                    Debug.LogError("解压失败  ---- " + request.error);
                 }
                 else
                 {
