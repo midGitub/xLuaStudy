@@ -92,8 +92,7 @@ public class LuaManager : MonoBehaviour
             {
                 if (request.isHttpError || request.isNetworkError)
                 {
-                    Debug.LogError("解压失败  ---- " + request.url);
-                    Debug.LogError("解压失败  ---- " + request.error);
+                    Debug.LogError("解压失败  ---- " + request.error + "  " + request.url);
                 }
                 else
                 {
@@ -112,13 +111,13 @@ public class LuaManager : MonoBehaviour
                 }
 
                 dCount++;
+                UILoadingView.Instance.Refresh(dCount, vasList.Count, "初始化LUA脚本中");
                 if (dCount == vasList.Count)
                 {
                     Debug.Log("加载LUA完成");
                     InitLuaEnv();
                 }
             };
-            Debug.LogError(path);
             UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
         }
     }

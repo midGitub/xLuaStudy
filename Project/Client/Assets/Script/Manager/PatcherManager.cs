@@ -67,12 +67,11 @@ public class PatcherManager : MonoBehaviour
 
         List<VersionIsNewPackage> allPackageVersionList = new List<VersionIsNewPackage>();
 
-        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[5];
+        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[4];
 
         tasks[0] = (cb) =>
         {
-            //先用UnityWebRequest加载本地version.json文件(Android环境下只能用WWW加载)
-            //因为在复制的过程中需要用到这个文件
+            //先用UnityWebRequest加载本地version.json文件
             string path = string.Empty;
             bool isExitsInPD = File.Exists(PathDefine.presitantABPath(pfStr) + "Version/version.json");
             Debug.Log("isExitsInPD  " + isExitsInPD);
@@ -110,21 +109,6 @@ public class PatcherManager : MonoBehaviour
 
         tasks[1] = (cb) =>
         {
-            cb((int)LocalCode.SUCCESS);
-
-            //将streamingAssets下的文件copy到从StreamingAssets至persistentDataPath
-            //if (PlayerPrefs.GetInt("SACopyLUAToPD" + GameSetting.Instance.versionCode, 0) == 0 || GameSetting.Instance.forceCopy == true)
-            //{
-            //    copyLua(cb);
-            //}
-            //else
-            //{
-            //    cb((int)LocalCode.SUCCESS);
-            //}
-        };
-
-        tasks[2] = (cb) =>
-        {
             //获取当前可升级到的版本（模拟访问PHP返回数据） 现在并不需要对数据做任何处理
             WWWForm wwwForm = new WWWForm();
             wwwForm.headers.Add("headersKey", "headersValue");
@@ -147,7 +131,7 @@ public class PatcherManager : MonoBehaviour
             });
         };
 
-        tasks[3] = (cb) =>
+        tasks[2] = (cb) =>
         {
             //拿到服务器版本之后 先判断当前版本是否需要热更(先判断presitantDataPath里面有没有这个文件，若没有 则使用GameSetting里面的VersionCode)
             //若需要热更新 去CDN（即本地服务器的AssetsBundle目录）下载AllPackageVersion.json
@@ -226,7 +210,7 @@ public class PatcherManager : MonoBehaviour
             }
         };
 
-        tasks[4] = (cb) =>
+        tasks[3] = (cb) =>
         {
             //到达此步  已经下载完AllPackageVersion.json 
             //本地的version.json文件在上面已经加载好了
@@ -317,62 +301,6 @@ public class PatcherManager : MonoBehaviour
 
         AsyncHelper asyncHelper = new AsyncHelper();
         asyncHelper.Waterfall(tasks, finalCB);
-    }
-
-    /// <summary>
-    /// 将streamingAssets下的lua文件copy到从StreamingAssets至persistentDataPath
-    /// 为什么不直接用io函数拷贝，原因在于streaming目录不支持，
-    /// </summary>
-    public void copyLua(Action<int> cb)
-    {
-        int dCount = 0;
-
-        List<ABNameHash> luaNameHashList = localVersionJsonObj.ABHashList.FindAll(t => t.abName.Contains("lua/"));
-
-
-        for (int i = 0; i < luaNameHashList.Count; i++)
-        {
-            ABNameHash cur = luaNameHashList[i];
-            string path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + cur.abName;
-
-            Action<UnityWebRequest> DownloadCB = (request) =>
-            {
-                if (request.isHttpError || request.isNetworkError)
-                {
-                    Debug.LogError(request.error);
-                    cb.Invoke((int)LocalCode.SACopyToPDCoroutineFault);
-                }
-                else
-                {
-                    string savePath = string.Empty;
-#if UNITY_EDITOR
-                    savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" + cur.abName;
-                    Debug.Log(savePath);
-#elif UNITY_ANDROID && !UNITY_EDITOR
-                 savePath = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/" +  cur.abName;
-#endif
-                    string[] nameSplit = cur.abName.Split('/');
-
-                    byte[] byteArray = request.downloadHandler.data;
-
-                    Helper.SaveAssetToLocalFile(savePath, byteArray);
-
-                    dCount++;
-                    uiLoadingView.Refresh(dCount, luaNameHashList.Count, "正在复制文件(从StreamingAssets至persistentDataPath)");
-
-                    if (dCount == luaNameHashList.Count)
-                    {
-                        PlayerPrefs.SetInt("SACopyLUAToPD" + GameSetting.Instance.versionCode, 1);
-                        if (cb != null)
-                        {
-                            cb.Invoke((int)LocalCode.SUCCESS);
-                        }
-                    }
-                }
-            };
-
-            UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
-        }
     }
 }
 

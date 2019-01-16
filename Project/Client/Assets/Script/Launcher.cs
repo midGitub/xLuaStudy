@@ -14,14 +14,6 @@ public class Launcher : MonoBehaviour
 
     private void Start()
     {
-#if UNITY_ANDROID&&!UNITY_EDITOR
-        AndroidActivity aa = new AndroidActivity();
-        int n1 = aa.add(12, 54);
-        int n2 = aa.add(1, 54);
-
-        Debug.LogError(n1 + "    " + n2);
-#endif
-        
         if (GameSetting.Instance.patcher)
         {
             PatcherManager.Instance.Check(CheckPatcherEnd);
@@ -31,7 +23,7 @@ public class Launcher : MonoBehaviour
             Init();
         }
     }
-    
+
 
     /// <summary>
     /// 检查热更完成回调
@@ -45,7 +37,7 @@ public class Launcher : MonoBehaviour
         {
             Init();
         }
-        else if (code == (int) LocalCode.CurServerVerIsNewPackage)
+        else if (code == (int)LocalCode.CurServerVerIsNewPackage)
         {
             Debug.LogError("下版本是全新整包，需要换包");
         }
