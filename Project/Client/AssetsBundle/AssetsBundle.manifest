@@ -1,0 +1,19 @@
+ManifestFileVersion: 0
+CRC: 2633222913
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: view/uistartview.prefab.unity3d
+      Dependencies: {}
+    Info_1:
+      Name: view/uirootview.prefab.unity3d
+      Dependencies: {}
+    Info_2:
+      Name: lua/base
+      Dependencies: {}
+    Info_3:
+      Name: lua/view
+      Dependencies: {}
+    Info_4:
+      Name: scene/game.unity3d
+      Dependencies: {}

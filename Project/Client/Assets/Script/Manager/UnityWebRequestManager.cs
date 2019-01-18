@@ -15,12 +15,7 @@ public class UnityWebRequestManager : MonoBehaviour
         {
             if (instance == null)
             {
-                GameObject managerGroup = GameObject.Find("ManagerGroup");
-                if (managerGroup == null)
-                {
-                    managerGroup = new GameObject();
-                    managerGroup.name = "ManagerGroup";
-                }
+                GameObject managerGroup = Helper.GetManagerGroup();
 
                 instance = managerGroup.GetComponentInChildren<UnityWebRequestManager>();
                 if (instance == null)
@@ -237,8 +232,8 @@ public class UnityWebRequestManager : MonoBehaviour
     /// <returns></returns>
     IEnumerator _GetAssetBundle(string url, Action<AssetBundle> actionResult)
     {
-        UnityWebRequest www = new UnityWebRequest(url);
-        DownloadHandlerAssetBundle handler = new DownloadHandlerAssetBundle(www.url, uint.MaxValue);
+        UnityWebRequest www = new UnityWebRequest(url, UnityWebRequest.kHttpVerbGET);
+        DownloadHandlerAssetBundle handler = new DownloadHandlerAssetBundle(www.url, 0);
         www.downloadHandler = handler;
         yield return www.SendWebRequest();
         AssetBundle bundle = null;
@@ -251,7 +246,7 @@ public class UnityWebRequestManager : MonoBehaviour
             actionResult(bundle);
         }
     }
-
+    
     /// <summary>
     /// 请求服务器地址上的音效
     /// </summary>

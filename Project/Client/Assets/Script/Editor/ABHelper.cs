@@ -98,6 +98,7 @@ public static class ABHelper
     public static void SetBundleNameAll()
     {
         SetViewPrefabName();
+        SetSceneName();
         SetLuaBundleName();
     }
 
@@ -144,6 +145,42 @@ public static class ABHelper
         AssetDatabase.Refresh();
     }
 
+    /// <summary>
+    /// 设置场景的ABName
+    /// </summary>
+    public static void SetSceneName()
+    {
+        //scene
+        //暂不考虑光照贴图 此类的东西 只打最原始的Scene
+        string scenePath = "Assets/Scene";
+        string[] scenePaths = Directory.GetFiles(scenePath, "*.unity", SearchOption.AllDirectories);
+
+        for (int i = 0; i < scenePaths.Length; i++)
+        {
+            string[] split = scenePaths[i].Replace('\\', '/').Split('/');
+            string bundleName = split[split.Length - 1].Replace(".unity", ".unity3d");
+            AssetImporter importer = AssetImporter.GetAtPath(scenePaths[i]);
+            if (importer != null)
+            {
+                if (importer.assetBundleName != bundleName)
+                {
+                    importer.assetBundleName = "Scene/" + bundleName;
+                }
+            }
+            else
+            {
+                Debug.LogError("Scene {0} load importer failed:" + scenePaths[i]);
+                return;
+            }
+        }
+
+        EditorUtility.ClearProgressBar();
+        AssetDatabase.Refresh();
+    }
+
+    /// <summary>
+    /// 设置LuaBundleName
+    /// </summary>
     public static void SetLuaBundleName()
     {
         string outputByteRootPath = Helper.CheckPathExistence("Assets/LuaByte/");

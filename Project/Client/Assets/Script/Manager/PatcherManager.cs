@@ -16,12 +16,7 @@ public class PatcherManager : MonoBehaviour
         {
             if (instance == null)
             {
-                GameObject managerGroup = GameObject.Find("ManagerGroup");
-                if (managerGroup == null)
-                {
-                    managerGroup = new GameObject();
-                    managerGroup.name = "ManagerGroup";
-                }
+                GameObject managerGroup = Helper.GetManagerGroup();
 
                 instance = managerGroup.GetComponentInChildren<PatcherManager>();
                 if (instance == null)
@@ -73,15 +68,11 @@ public class PatcherManager : MonoBehaviour
         {
             //先用UnityWebRequest加载本地version.json文件
             string path = string.Empty;
-            bool isExitsInPD = File.Exists(PathDefine.presitantABPath(pfStr) + "Version/version.json");
+            bool isExitsInPD = File.Exists(PathDefine.presitantABPath() + "Version/version.json");
             Debug.Log("isExitsInPD  " + isExitsInPD);
             if (isExitsInPD)
             {
-#if UNITY_EDITOR
-                path = PathDefine.presitantABPath(pfStr) + "Version/version.json";
-#elif !UNITY_EDITOR && UNITY_ANDROID
-                path ="file://"+ PathDefine.presitantABPath(pfStr) + "Version/version.json";
-#endif
+                path = PathDefine.presitantABPath() + "Version/version.json";
             }
             else
             {
@@ -250,7 +241,7 @@ public class PatcherManager : MonoBehaviour
 
                         //保存当前这份最新的 version.json 文件
                         byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(request.downloadHandler.text);
-                        Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(pfStr), "Version/version.json",
+                        Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(), "Version/version.json",
                             byteArray);
                         localVersionJsonObj = serverVersionJson;
                     }
@@ -273,7 +264,7 @@ public class PatcherManager : MonoBehaviour
                                 FileVersionJsonObject fileVersionJsonObject = Helper.LoadFileVersionJson(fileVersionRequest.downloadHandler.text);
                                 //保存当前这份最新的 fileversion.json 文件
                                 byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(fileVersionRequest.downloadHandler.text);
-                                Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(pfStr), "FileVersion/fileversion.json", byteArray);
+                                Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(), "FileVersion/fileversion.json", byteArray);
 
                                 List<VersionAndSize> vasList = new List<VersionAndSize>();
                                 foreach (string name in shouldDownloadList)

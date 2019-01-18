@@ -467,5 +467,18 @@ public class Helper
     {
         return System.Text.Encoding.Default.GetString(byteArray);
     }
+
+    public static GameObject GetManagerGroup()
+    {
+        GameObject managerGroup = GameObject.Find("ManagerGroup");
+        if (managerGroup == null)
+        {
+            managerGroup = new GameObject();
+            managerGroup.name = "ManagerGroup";
+            UnityEngine.Object.DontDestroyOnLoad(managerGroup);
+        }
+
+        return managerGroup;
+    }
 }
 

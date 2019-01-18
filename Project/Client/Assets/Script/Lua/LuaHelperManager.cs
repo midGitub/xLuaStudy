@@ -1,5 +1,8 @@
 ﻿
+using System;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using XLua;
 
 //Lua中调用该C#脚本  运行前XLua  Generate Code 运行一下
@@ -39,6 +42,15 @@ public class LuaHelperManager
             obj.AddComponent<LuaViewBehaviour>();
             OnCreate(obj);
         }
+    }
+
+    public void LoadLevel(string sceneName)
+    {
+        Debug.Log("加载场景  " + sceneName);
+        string abPath = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/scene/game.unity3d";
+
+        //AssetBundleManager.Instance.loadscene();
+        LoaderManager.LoadSceneAsync("Game", DataFrom.PERSISTENTDATAPATH, null);
     }
 }
 

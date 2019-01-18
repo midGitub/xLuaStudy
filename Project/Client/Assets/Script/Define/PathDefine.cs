@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 /// <summary>
 /// 各种路径的定义
@@ -37,7 +38,17 @@ public class PathDefine
         return Application.streamingAssetsPath + "/" + pfStr + "/";
     }
 
-    public static string presitantABPath(string pfStr) { return Application.persistentDataPath + "/" + pfStr + "/"; }
+    public static string presitantABPath()
+    {
+        string path = string.Empty;
+#if UNITY_EDITOR
+        path = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/AssetsBundle/";
+#elif !UNITY_EDITOR && UNITY_ANDROID
+        path = Application.persistentDataPath + "/" +  Helper.GetPlatformString() + "/AssetsBundle/";
+#endif
+        return path;
+    }
+
     #endregion
 
     #region server
@@ -61,5 +72,21 @@ public class PathDefine
     /// <param name="pfStr"></param>
     /// <returns></returns>
     public static string serverPathInLocal_AllPackageVersion(string pfStr) { return "../Server/AssetsBundle/" + pfStr + "/" + "AllPackageVersion.json"; }
+
+    public static string GetAssetUrl(string assetName)
+    {
+        string url = string.Empty;
+
+        FileInfo fi = new FileInfo(presitantABPath() + "AssetsBundle/" + assetName);
+        if (fi.Exists)
+        {
+            return fi.FullName;
+        }
+        else
+        {
+            return StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + assetName;
+        }
+    }
+
     #endregion
 }

@@ -29,5 +29,11 @@ public class GameSetting : ScriptableObject
 
     [Header("是否强制开启SA到PD的复制")]
     public bool forceCopy;
+
+    [Header("是否读Assets/Lua文件夹下的Lua文件")]
+    public bool readLocalLua;
+
+    [Header("当前帧最大加载个数")]
+    public int MaxhitThreshold;
 }
 

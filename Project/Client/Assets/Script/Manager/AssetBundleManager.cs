@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
@@ -20,12 +21,7 @@ public class AssetBundleManager : MonoBehaviour
         {
             if (instance == null)
             {
-                GameObject managerGroup = GameObject.Find("ManagerGroup");
-                if (managerGroup == null)
-                {
-                    managerGroup = new GameObject();
-                    managerGroup.name = "ManagerGroup";
-                }
+                GameObject managerGroup = Helper.GetManagerGroup();
 
                 instance = managerGroup.GetComponentInChildren<AssetBundleManager>();
                 if (instance == null)
@@ -49,7 +45,7 @@ public class AssetBundleManager : MonoBehaviour
         {
             if (_fileVersionJsonObject == null)
             {
-                string path = PathDefine.presitantABPath(Helper.GetPlatformString()) + "FileVersion/fileversion.json";
+                string path = PathDefine.presitantABPath() + "FileVersion/fileversion.json";
                 string str = Helper.byteArrayToString(Helper.LoadFileData(path));
                 _fileVersionJsonObject = Helper.LoadFileVersionJson(str);
             }
@@ -78,7 +74,7 @@ public class AssetBundleManager : MonoBehaviour
                 if (request.isHttpError || request.isNetworkError)
                 {
                     Debug.LogError(request.error + "  -----  " + path);
-                    cb((int)LocalCode.DownloadBundleFault);
+                    cb((int)LocalCode.DOWNLOAD_BUNDLE_FAULT);
                 }
                 else
                 {
@@ -92,7 +88,23 @@ public class AssetBundleManager : MonoBehaviour
                 }
             };
 
-            UnityWebRequestManager.Instance.DownloadFile(path, PathDefine.presitantABPath(pfStr) + "AssetsBundle/" + list[i].name, DownloadCB);
+            UnityWebRequestManager.Instance.DownloadFile(path, PathDefine.presitantABPath() + "AssetsBundle/" + list[i].name, DownloadCB);
         }
+    }
+
+    public void loadscene()
+    {
+        StartCoroutine(load());
+    }
+
+    IEnumerator load()
+    {
+        string abPath = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/scene/game.unity3d";
+        AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(abPath,0);
+        yield return abcr.assetBundle;
+        AssetBundle ab = abcr.assetBundle;
+
+
+        AsyncOperation ao = SceneManager.LoadSceneAsync("Game", LoadSceneMode.Single);
     }
 }

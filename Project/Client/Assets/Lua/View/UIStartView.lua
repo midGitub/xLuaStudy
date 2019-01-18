@@ -29,5 +29,6 @@ function UIStartView.OnDestroy()
 end
 
 function UIStartView.OnStartButtonClick()
-    print("OnStartButtonClick()  4444444444444")
+    print("OnStartButtonClick()")
+    CS.LuaHelperManager.Instance:LoadLevel("Game")
 end
