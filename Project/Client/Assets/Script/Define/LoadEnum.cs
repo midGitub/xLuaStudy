@@ -15,7 +15,6 @@ public enum AssetPriority
 /// </summary>
 public enum DataFrom
 {
-    STREAMINGASSETS,
-    PERSISTENTDATAPATH,
-    RESOURCES
+    RESOURCES,
+    BUNDLE
 }

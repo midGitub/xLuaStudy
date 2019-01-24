@@ -5,31 +5,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class UnityWebRequestManager : MonoBehaviour
+public class UnityWebRequestManager : SingletonBehaviour<UnityWebRequestManager>
 {
-    private static UnityWebRequestManager instance;
-
-    public static UnityWebRequestManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject managerGroup = Helper.GetManagerGroup();
-
-                instance = managerGroup.GetComponentInChildren<UnityWebRequestManager>();
-                if (instance == null)
-                {
-                    GameObject go = new GameObject();
-                    go.transform.parent = managerGroup.transform;
-                    go.name = typeof(UnityWebRequestManager).Name;
-                    instance = go.AddComponent<UnityWebRequestManager>();
-                }
-            }
-            return instance;
-        }
-    }
-
     /*
     UnityWebRequest uwr = new UnityWebRequest();
     uwr.url = "http://www.mysite.com";

@@ -50,7 +50,7 @@ public class LuaHelperManager
         string abPath = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/scene/game.unity3d";
 
         //AssetBundleManager.Instance.loadscene();
-        LoaderManager.LoadSceneAsync("Game", DataFrom.PERSISTENTDATAPATH, null);
+        LoaderManager.LoadSceneAsync("Game", GameSetting.Instance.from, null);
     }
 }
 

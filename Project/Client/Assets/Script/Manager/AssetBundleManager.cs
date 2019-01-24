@@ -10,32 +10,8 @@ public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
 /// 加载AssetBundle
 /// </summary>
-public class AssetBundleManager : MonoBehaviour
+public class AssetBundleManager : SingletonBehaviour<AssetBundleManager>
 {
-    #region Instance
-    private static AssetBundleManager instance;
-
-    public static AssetBundleManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject managerGroup = Helper.GetManagerGroup();
-
-                instance = managerGroup.GetComponentInChildren<AssetBundleManager>();
-                if (instance == null)
-                {
-                    GameObject go = new GameObject();
-                    go.transform.parent = managerGroup.transform;
-                    go.name = typeof(AssetBundleManager).Name;
-                    instance = go.AddComponent<AssetBundleManager>();
-                }
-            }
-            return instance;
-        }
-    }
-    #endregion
 
     private FileVersionJsonObject _fileVersionJsonObject = null;
 

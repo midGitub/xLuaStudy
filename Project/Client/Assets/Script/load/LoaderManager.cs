@@ -2,37 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LoaderManager : MonoBehaviour
+public class LoaderManager : SingletonBehaviour<LoaderManager>
 {
-    #region Instance
-    private static LoaderManager instance;
-
-    public static LoaderManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject managerGroup = Helper.GetManagerGroup();
-
-                instance = managerGroup.GetComponentInChildren<LoaderManager>();
-                if (instance == null)
-                {
-                    GameObject go = new GameObject();
-                    go.transform.parent = managerGroup.transform;
-                    go.name = typeof(LoaderManager).Name;
-                    instance = go.AddComponent<LoaderManager>();
-                }
-            }
-            return instance;
-        }
-    }
-    #endregion
-
     /// <summary>
     /// 等待加载队列
     /// </summary>
     private static LinkedListNode<LoadRequest>[] waitingQueue;
+
+    /// <summary>
+    /// 帧时间片控制
+    /// </summary>
+    public static float frameTimeLimit { get; set; }
 
     private int curHitCount = 0;
     public void Init()
@@ -45,6 +25,7 @@ public class LoaderManager : MonoBehaviour
             var list = new LinkedList<LoadRequest>();
             list.AddFirst(waitingQueue[i]);
         }
+        frameTimeLimit = 0.5f;
     }
 
     private void Update()
@@ -60,16 +41,28 @@ public class LoaderManager : MonoBehaviour
                 continue;
             }
 
+            bool isOverHit = curHitCount > GameSetting.Instance.MaxhitThreshold;
+            bool isOverTime = Time.realtimeSinceStartup - FrameHelper.frameStartTime > frameTimeLimit;
+
+            //不能超过当前最大加载数 以及 帧时间不能超过最大加载时间
             var curNode = curQueue.Next;
-            while (curNode != null && curHitCount <= GameSetting.Instance.MaxhitThreshold)
+            while (curNode != null && !isOverHit && !isOverTime)
             {
+                bool rm = false;
                 try
                 {
-                    curNode.Value.Load((AssetPriority) i);
+                    curNode.Value.Load((AssetPriority)i, out rm);
                 }
                 finally
                 {
-                    curNode = removeQNode(curNode);
+                    if (rm)
+                    {
+                        curNode = removeQNode(curNode);
+                    }
+                    else
+                    {
+                        curNode = curNode.Next;
+                    }
                 }
             }
         }
@@ -87,5 +80,11 @@ public class LoaderManager : MonoBehaviour
     {
         LoadSceneRequest req = new LoadSceneRequest(sceneName, from, onLoadFinishCB);
         waitingQueue[(int)AssetPriority.SCENE].List.AddLast(req);
+    }
+
+    public static void LoadAllLuaSync(DataFrom from, Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
+    {
+        LoadLuaRequest req = new LoadLuaRequest(from, onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+        waitingQueue[(int)AssetPriority.CODE].List.AddLast(req);
     }
 }

@@ -49,6 +49,17 @@ public class PathDefine
         return path;
     }
 
+    public static string presitantRootPath()
+    {
+        string path = string.Empty;
+#if UNITY_EDITOR
+        path = Application.persistentDataPath + "/" + Helper.GetPlatformString() + "/";
+#elif !UNITY_EDITOR && UNITY_ANDROID
+        path = Application.persistentDataPath + "/" +  Helper.GetPlatformString() + "/";
+#endif
+        return path;
+    }
+
     #endregion
 
     #region server

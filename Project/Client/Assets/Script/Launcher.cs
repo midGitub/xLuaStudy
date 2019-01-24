@@ -24,7 +24,6 @@ public class Launcher : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// 检查热更完成回调
     /// </summary>
@@ -45,6 +44,19 @@ public class Launcher : MonoBehaviour
 
     public void Init()
     {
+        float a = float.MaxValue;
+        float b = float.MaxValue + 900.0f;
+        Debug.LogError(a);
+        Debug.LogError(b);
+        Debug.LogError(a + b);
+        Debug.LogError(b - a);
+        Debug.LogError(a + b > a);
+        int c = 0;
+        Debug.LogError((int)(c + float.MaxValue));
+
+        int d = 43534;
+        Debug.LogError((int)(d + float.MaxValue));
+
         LoaderManager.Instance.Init();
         LuaManager.Instance.Init();
     }

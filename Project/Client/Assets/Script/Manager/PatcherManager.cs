@@ -6,32 +6,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class PatcherManager : MonoBehaviour
+public class PatcherManager : SingletonBehaviour<PatcherManager>
 {
-    #region Instance
-    private static PatcherManager instance;
-    public static PatcherManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject managerGroup = Helper.GetManagerGroup();
-
-                instance = managerGroup.GetComponentInChildren<PatcherManager>();
-                if (instance == null)
-                {
-                    GameObject go = new GameObject();
-                    go.transform.parent = managerGroup.transform;
-                    go.name = typeof(PatcherManager).Name;
-                    instance = go.AddComponent<PatcherManager>();
-                }
-            }
-            return instance;
-        }
-    }
-    #endregion
-
     public List<string> shouldDownloadList = new List<string>();
 
     /// <summary>
@@ -244,6 +220,7 @@ public class PatcherManager : MonoBehaviour
                         Helper.SaveAssetToLocalFile(PathDefine.presitantABPath(), "Version/version.json",
                             byteArray);
                         localVersionJsonObj = serverVersionJson;
+                        GameSetting.Instance.versionCode = (int)serverVersionJson.version;
                     }
 
                     if (shouldDownloadList.Count > 0)

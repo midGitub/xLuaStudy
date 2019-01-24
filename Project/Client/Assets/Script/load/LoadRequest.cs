@@ -1,13 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using UnityEngine;
 
 public class LoadRequest
 {
-    public virtual bool Load(AssetPriority priority)
+    /// <summary>
+    /// 资源加载申请过期时间
+    /// </summary>
+    protected float timeout { get; set; }
+
+    public virtual bool Load(AssetPriority priority, out bool process)
     {
+        process = false;
+        return false;
+    }
+
+    protected bool isTimeout()
+    {
+        if (timeout <= Time.realtimeSinceStartup)
+        {
+            return true;
+        }
         return false;
     }
 }
