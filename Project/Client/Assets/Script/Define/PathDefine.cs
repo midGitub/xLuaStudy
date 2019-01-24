@@ -87,16 +87,25 @@ public class PathDefine
     public static string GetAssetUrl(string assetName)
     {
         string url = string.Empty;
+        string pdPath = presitantABPath() + "AssetsBundle/" + assetName;
+        string saPath = StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + assetName;
 
-        FileInfo fi = new FileInfo(presitantABPath() + "AssetsBundle/" + assetName);
-        if (fi.Exists)
+        switch (GameSetting.Instance.runType)
         {
-            return fi.FullName;
+            case RunType.PATCHER_SA_PS:
+                FileInfo fi = new FileInfo(pdPath);
+                if (fi.Exists) { url = fi.FullName; }
+                else { url = saPath; }
+                break;
+            case RunType.NOPATCHER_SA:
+                url = saPath;
+                break;
+            case RunType.NOPATCHER_RES:
+                Debug.LogError("读RES不应该使用这个接口");
+                break;
         }
-        else
-        {
-            return StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + assetName;
-        }
+
+        return url;
     }
 
     #endregion

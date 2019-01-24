@@ -76,15 +76,15 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
         return node;
     }
 
-    public static void LoadSceneAsync(string sceneName, DataFrom from, Action<int> onLoadFinishCB)
+    public static void LoadSceneAsync(string sceneName, Action<int> onLoadFinishCB)
     {
-        LoadSceneRequest req = new LoadSceneRequest(sceneName, from, onLoadFinishCB);
+        LoadSceneRequest req = new LoadSceneRequest(sceneName, onLoadFinishCB);
         waitingQueue[(int)AssetPriority.SCENE].List.AddLast(req);
     }
 
-    public static void LoadAllLuaSync(DataFrom from, Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
+    public static void LoadAllLuaSync(Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
     {
-        LoadLuaRequest req = new LoadLuaRequest(from, onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+        LoadLuaRequest req = new LoadLuaRequest(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
         waitingQueue[(int)AssetPriority.CODE].List.AddLast(req);
     }
 }

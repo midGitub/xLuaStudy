@@ -2,32 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using UnityEngine.SceneManagement;
 
 public class LoadSceneRequest : LoadRequest
 {
     public Action<int> onLoadFinishCallback;
 
     private string sceneName;
-    private DataFrom from;
     private bool cacheFlag;
-    public LoadSceneRequest(string sceneName, DataFrom from, Action<int> onLoadFinishCallback)
+    public LoadSceneRequest(string sceneName, Action<int> onLoadFinishCallback)
     {
         this.timeout = float.MaxValue;
         this.sceneName = sceneName;
-        this.from = from;
         this.onLoadFinishCallback = onLoadFinishCallback;
     }
 
     public override bool Load(AssetPriority priority, out bool process)
     {
-        if (DataFrom.BUNDLE == from)
+        switch (GameSetting.Instance.runType)
         {
-            AssetBundleLoader.LoadSceneAsync(sceneName, onLoadFinishCallback);
-        }
-        else if (DataFrom.RESOURCES == from)
-        {
-
+            case RunType.PATCHER_SA_PS:
+                AssetBundleLoader.LoadSceneAsync(sceneName, onLoadFinishCallback);
+                break;
+            case RunType.NOPATCHER_SA:
+                AssetBundleLoader.LoadSceneAsync(sceneName, onLoadFinishCallback);
+                break;
+            case RunType.NOPATCHER_RES:
+                SceneManager.LoadScene("Game");
+                break;
         }
         process = true;
         return true;

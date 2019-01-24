@@ -21,18 +21,15 @@ public class GameSetting : ScriptableObject
         }
     }
 
-    [Header("是否开启热更新")]
-    public bool patcher;
+    [Header("运行方式")]
+    public RunType runType;
 
     [Header("当前整包版本")]
     public int versionCode;
 
     [Header("是否强制开启SA到PD的复制")]
     public bool forceCopy;
-
-    [Header("资源来源")]
-    public DataFrom from;
-
+    
     [Header("当前帧最大加载个数")]
     public int MaxhitThreshold;
 }

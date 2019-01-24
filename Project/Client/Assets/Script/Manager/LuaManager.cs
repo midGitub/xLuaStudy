@@ -49,7 +49,6 @@ public class LuaManager : SingletonBehaviour<LuaManager>
         };
 
         LoaderManager.LoadAllLuaSync(
-            GameSetting.Instance.from,
             onLoadSingleFinishCallBack,
             onLoadAllFinishCallBack);
     }

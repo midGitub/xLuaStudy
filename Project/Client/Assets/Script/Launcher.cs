@@ -14,7 +14,7 @@ public class Launcher : MonoBehaviour
 
     private void Start()
     {
-        if (GameSetting.Instance.patcher)
+        if (GameSetting.Instance.runType == RunType.PATCHER_SA_PS)
         {
             PatcherManager.Instance.Check(CheckPatcherEnd);
         }

@@ -8,25 +8,27 @@ public class LoadLuaRequest : LoadRequest
 {
     private Action<int, int> onLoadSingleFinishCallBack;
     private Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack;
-    private DataFrom from;
 
-    public LoadLuaRequest(DataFrom from, Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
+    public LoadLuaRequest(Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
     {
         this.timeout = float.MaxValue;
-        this.from = from;
         this.onLoadSingleFinishCallBack = onLoadSingleFinishCallBack;
         this.onLoadAllFinishCallBack = onLoadAllFinishCallBack;
     }
 
     public override bool Load(AssetPriority priority, out bool process)
     {
-        if (DataFrom.BUNDLE == from)
+        switch (GameSetting.Instance.runType)
         {
-            AssetBundleLoader.LoadLuaInBundle(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
-        }
-        else if (DataFrom.RESOURCES == from)
-        {
-            AssetBundleLoader.LoadLuaInResources(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+            case RunType.PATCHER_SA_PS:
+                AssetBundleLoader.LoadLuaInBundle(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+                break;
+            case RunType.NOPATCHER_SA:
+                AssetBundleLoader.LoadLuaInBundle(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+                break;
+            case RunType.NOPATCHER_RES:
+                AssetBundleLoader.LoadLuaInResources(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+                break;
         }
         process = true;
         return true;
