@@ -29,8 +29,11 @@ public class GameSetting : ScriptableObject
 
     [Header("是否强制开启SA到PD的复制")]
     public bool forceCopy;
-    
+
     [Header("当前帧最大加载个数")]
     public int MaxhitThreshold;
+
+    [Header("最大帧时间片")]
+    public float frameTimeLimit;
 }
 

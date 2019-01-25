@@ -7,7 +7,7 @@ public class LoadRequest
     /// </summary>
     protected float timeout { get; set; }
 
-    public virtual bool Load(AssetPriority priority, out bool process)
+    public virtual bool Load(Priority priority, out bool process)
     {
         process = false;
         return false;

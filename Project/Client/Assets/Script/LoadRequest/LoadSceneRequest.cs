@@ -17,7 +17,7 @@ public class LoadSceneRequest : LoadRequest
         this.onLoadFinishCallback = onLoadFinishCallback;
     }
 
-    public override bool Load(AssetPriority priority, out bool process)
+    public override bool Load(Priority priority, out bool process)
     {
         switch (GameSetting.Instance.runType)
         {

@@ -58,6 +58,13 @@ public class Launcher : MonoBehaviour
         Debug.LogError((int)(d + float.MaxValue));
 
         LoaderManager.Instance.Init();
-        LuaManager.Instance.Init();
+
+        //for (int i = 0; i < 10000; i++)
+        //{
+        //    LoaderManager.LoadAssetSync();
+        //}
+
+
+         LuaManager.Instance.Init();
     }
 }
