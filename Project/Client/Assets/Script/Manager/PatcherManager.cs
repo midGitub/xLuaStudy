@@ -62,7 +62,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                 if (request.isNetworkError || request.isHttpError)
                 {
                     Debug.Log(request.error);
-                    cb((int)LocalCode.DownloadVersionJsonFault);
+                    cb((int)LocalCode.DOWNLOAD_VERSIONJSON_FAULT);
                 }
                 else
                 {
@@ -87,7 +87,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                 if (request.isNetworkError || request.isHttpError)
                 {
                     Debug.Log(request.error);
-                    cb((int)LocalCode.ReqServerVersionCodeFault);
+                    cb((int)LocalCode.REQ_SERVER_VERSION_CODE_FAULT);
                 }
                 else
                 {
@@ -108,7 +108,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                 if (request.isNetworkError || request.isHttpError)
                 {
                     Debug.Log(request.error);
-                    cb((int)LocalCode.DownloadAllPackageVersionFault);
+                    cb((int)LocalCode.DOWNLOAD_ALL_PACKAGEVERSION_FAULT);
                 }
                 else
                 {
@@ -148,7 +148,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                             else
                             {
                                 //需要换包
-                                cb((int)LocalCode.CurServerVerIsNewPackage);
+                                cb((int)LocalCode.CUR_SERVERVER_IS_NEWPACKAGE);
                             }
                         }
                         else
@@ -160,7 +160,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                     else
                     {
                         //在资源库中找不到对应版本资源
-                        cb((int)LocalCode.CanNotFindVersionInCDN);
+                        cb((int)LocalCode.CAN_NOT_FIND_VERSION_IN_CDN);
                     }
                 }
             };
@@ -173,7 +173,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
             else
             {
                 //当前版本已是最新 无需更新
-                cb((int)LocalCode.CurVerIsNewest);
+                cb((int)LocalCode.CUR_VER_IS_NEWEST);
             }
         };
 
@@ -189,7 +189,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                 if (request.isHttpError || request.isNetworkError)
                 {
                     Debug.LogError(request.error + "  -----  下载服务端上的Version.json失败");
-                    cb((int)LocalCode.DownloadVersionJsonFault);
+                    cb((int)LocalCode.DOWNLOAD_VERSIONJSON_FAULT);
                 }
                 else
                 {
@@ -234,7 +234,7 @@ public class PatcherManager : SingletonBehaviour<PatcherManager>
                             if (fileVersionRequest.isNetworkError || fileVersionRequest.isHttpError)
                             {
                                 Debug.LogError(fileVersionRequest.error);
-                                cb((int)LocalCode.DownloadFileVersionJsonFault);
+                                cb((int)LocalCode.DOWNLOAD_FILEVERSIONJSON_FAULT);
                             }
                             else
                             {

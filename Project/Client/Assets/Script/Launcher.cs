@@ -32,11 +32,11 @@ public class Launcher : MonoBehaviour
     {
         Debug.Log("热更流程" + (LocalCode)code);
 
-        if (code == (int)LocalCode.SUCCESS || code == (int)LocalCode.CurVerIsNewest)
+        if (code == (int)LocalCode.SUCCESS || code == (int)LocalCode.CUR_VER_IS_NEWEST)
         {
             Init();
         }
-        else if (code == (int)LocalCode.CurServerVerIsNewPackage)
+        else if (code == (int)LocalCode.CUR_SERVERVER_IS_NEWPACKAGE)
         {
             Debug.LogError("下版本是全新整包，需要换包");
         }
@@ -44,27 +44,7 @@ public class Launcher : MonoBehaviour
 
     public void Init()
     {
-        float a = float.MaxValue;
-        float b = float.MaxValue + 900.0f;
-        Debug.LogError(a);
-        Debug.LogError(b);
-        Debug.LogError(a + b);
-        Debug.LogError(b - a);
-        Debug.LogError(a + b > a);
-        int c = 0;
-        Debug.LogError((int)(c + float.MaxValue));
-
-        int d = 43534;
-        Debug.LogError((int)(d + float.MaxValue));
-
         LoaderManager.Instance.Init();
-
-        //for (int i = 0; i < 10000; i++)
-        //{
-        //    LoaderManager.LoadAssetSync();
-        //}
-
-
-         LuaManager.Instance.Init();
+        LuaManager.Instance.Init();
     }
 }

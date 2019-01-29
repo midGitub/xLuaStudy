@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
-public delegate void dlg_OnAssetBundleDownLoadOver();
 /// <summary>
 /// 加载AssetBundle
 /// </summary>

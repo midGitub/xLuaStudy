@@ -14,7 +14,6 @@ public class LoadLuaRequest : LoadRequest
 
     public LoadLuaRequest(Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, byte[]>> onLoadAllFinishCallBack)
     {
-        this.timeout = float.MaxValue;
         this.onLoadSingleFinishCallBack = onLoadSingleFinishCallBack;
         this.onLoadAllFinishCallBack = onLoadAllFinishCallBack;
     }
@@ -47,8 +46,8 @@ public class LoadLuaRequest : LoadRequest
         switch (GameSetting.Instance.runType)
         {
             case RunType.PATCHER_SA_PS:
-                FileVersionJsonObject fileversion = AssetBundleManager.Instance.fileVersionJsonObject;
-                List<VersionAndSize> vasList = fileversion.versionSizeList.FindAll(t => t.name.Contains("lua/"));
+                FileVersionJsonObject fileVersion = AssetBundleManager.Instance.fileVersionJsonObject;
+                List<VersionAndSize> vasList = fileVersion.versionSizeList.FindAll(t => t.name.Contains("lua/"));
                 allCount = vasList.Count;
                 for (int i = 0; i < vasList.Count; i++)
                 {

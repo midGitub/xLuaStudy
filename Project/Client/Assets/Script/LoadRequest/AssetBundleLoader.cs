@@ -9,6 +9,7 @@ public class AssetBundleLoader
 {
     private static AssetBundleManifest manifest;
 
+
     private static void CheckInit()
     {
         if (manifest != null)
@@ -21,6 +22,7 @@ public class AssetBundleLoader
         if (mainBundle == null)
         {
             Debug.LogError("找不到AssetsBundle  " + mainBundleUrl);
+            Debug.LogError(LocalCode.DOWNLOAD_ASSETBUNDLEFILE_FAULT);
         }
 
         manifest = mainBundle.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
@@ -50,6 +52,7 @@ public class AssetBundleLoader
 
     private static IEnumerator LoadSceneByCoroutine(string bundlePath, string sceneName, Action<int> onLoadFinishCallBack)
     {
+        //todo 这里应该继续加载所有依赖项
         string[] dependencies = manifest.GetAllDependencies(bundlePath);
 
         string assetURL = PathDefine.GetAssetUrl(bundlePath);
@@ -71,6 +74,10 @@ public class AssetBundleLoader
         {
             onLoadFinishCallBack.Invoke((int)LocalCode.SUCCESS);
         }
+        else
+        {
+            onLoadFinishCallBack.Invoke((int)LocalCode.LOAD_SCENE_ERROR);
+        }
     }
 
     #endregion
@@ -78,10 +85,8 @@ public class AssetBundleLoader
     #region lua
 
     /// <summary>
-    /// 资源中加载所有Lua文件
+    /// 加载Lua文件
     /// </summary>
-
-
     public static void LoadLuaData(string path, Action<Dictionary<string, byte[]>> onLoadFinishCallBack)
     {
         Action<UnityWebRequest> DownloadCB = (request) =>
@@ -120,12 +125,52 @@ public class AssetBundleLoader
 
     #region asset
 
-    public static void LoadAsset(AssetType type, Action<int, object> onLoadFinishCallBack)
+    public static void LoadAsset(string name, AssetType type, Action<int, UnityEngine.Object> onLoadFinishCallBack)
     {
         CheckInit();
-        //if (GameSetting.Instance.runType == )
+
+        //这里需要通过AssetType 去区别加载数据的名字
+        string bundlePath = string.Empty;
+
+        string[] allBundleList = manifest.GetAllAssetBundles();
+
+        for (int i = 0; i < allBundleList.Length; i++)
+        {
+            if (type == AssetType.UIPREFAB)
+            {
+                if (allBundleList[i].Contains("view/") && allBundleList[i].Contains(name.ToLower()))
+                {
+                    bundlePath = allBundleList[i];
+                    break;
+                }
+            }
+        }
+
+        CoroutineManager.Instance.StartCoroutine(LoadAssetByCoroutine(bundlePath, name, onLoadFinishCallBack));
+    }
+
+    private static IEnumerator LoadAssetByCoroutine(string bundlePath, string name, Action<int, UnityEngine.Object> onLoadFinishCallBack)
+    {
+        //todo 这里应该继续加载所有依赖项
+        string[] dependencies = manifest.GetAllDependencies(bundlePath);
+
+        string assetURL = PathDefine.GetAssetUrl(bundlePath);
+        var req = AssetBundle.LoadFromFileAsync(assetURL);
+        yield return req;
+
+        if (req == null)
+        {
+            Debug.LogError("加载  " + bundlePath + "  失败----");
+            onLoadFinishCallBack.Invoke((int)LocalCode.LOAD_SCENE_ERROR, null);
+        }
+        else
+        {
+            AssetBundle ab = req.assetBundle;
+            UnityEngine.GameObject o = ab.LoadAsset<GameObject>(name);
+            ab.Unload(false);
+            onLoadFinishCallBack.Invoke((int)LocalCode.SUCCESS, o);
+        }
     }
 
     #endregion
 }
-

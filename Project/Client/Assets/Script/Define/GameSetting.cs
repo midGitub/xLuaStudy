@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -27,13 +28,16 @@ public class GameSetting : ScriptableObject
     [Header("当前整包版本")]
     public int versionCode;
 
-    [Header("是否强制开启SA到PD的复制")]
-    public bool forceCopy;
+    [Header("当前帧最大加载AB个数")]
+    public int MaxhitThresholdAB;
 
-    [Header("当前帧最大加载个数")]
-    public int MaxhitThreshold;
+    [Header("最大加载AB帧时间片")]
+    public float frameTimeLimitAB;
 
-    [Header("最大帧时间片")]
-    public float frameTimeLimit;
+    [Header("当前帧最大实例化Object个数")]
+    public int MaxhitThresholdObject;
+
+    [Header("最大实例化帧时间片")]
+    public float frameTimeLimitObject;
 }
 

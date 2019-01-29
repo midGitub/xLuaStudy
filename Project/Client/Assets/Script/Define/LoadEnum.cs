@@ -25,5 +25,13 @@ public enum RunType
 /// </summary>
 public enum AssetType
 {
-    UIPREFAB
+    UIPREFAB,
+    Texture,
+}
+
+public enum LoadStatus
+{
+    UNLOAD,
+    LOADING,
+    LOADEND
 }
