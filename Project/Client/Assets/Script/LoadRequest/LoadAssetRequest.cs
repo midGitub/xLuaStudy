@@ -12,8 +12,8 @@ public class LoadAssetRequest : LoadRequest
 
     private string name;
     private AssetType assetType = new AssetType();
-    private Action<int, UnityEngine.Object> onLoadFinishCallBack;
-    public LoadAssetRequest(string name, AssetType assetType, Action<int, UnityEngine.Object> onLoadFinishCallBack)
+    private Action<UnityEngine.Object> onLoadFinishCallBack;
+    public LoadAssetRequest(string name, AssetType assetType, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
         this.name = name;
         this.assetType = assetType;
@@ -27,12 +27,12 @@ public class LoadAssetRequest : LoadRequest
         {
             process = this.process;
 
-            Action<int, UnityEngine.Object> onLoadCallBack = (code, abObject) =>
-            {
-                this.loadStatus = LoadStatus.LOADEND;
-                this.process = true;
-                onLoadFinishCallBack.Invoke(code, abObject);
-            };
+            Action<UnityEngine.Object> onLoadCallBack = (abObject) =>
+           {
+               this.loadStatus = LoadStatus.LOADEND;
+               this.process = true;
+               onLoadFinishCallBack.Invoke(abObject);
+           };
 
             switch (GameSetting.Instance.runType)
             {
@@ -43,6 +43,7 @@ public class LoadAssetRequest : LoadRequest
                     AssetBundleLoader.LoadAsset(name, assetType, onLoadCallBack);
                     break;
                 case RunType.NOPATCHER_RES:
+                    ResourcesLoader.LoadAsset(name, assetType, onLoadCallBack);
                     break;
             }
 

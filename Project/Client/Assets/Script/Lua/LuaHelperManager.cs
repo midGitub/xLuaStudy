@@ -37,7 +37,7 @@ public class LuaHelperManager
         for (int k = 0; k < 10000; k++)
         {
             int kk = k;
-            Action<int, UnityEngine.Object> onLoadFinishCallBack = (code, p) =>
+            Action<UnityEngine.Object> onLoadFinishCallBack = (p) =>
             {
                 GameObject obj = GameObject.Instantiate(p) as GameObject;
                 obj.transform.SetParent(Canvas.transform, false);
@@ -50,7 +50,7 @@ public class LuaHelperManager
                 }
             };
 
-            LoaderManager.LoadAssetSync(path, AssetType.UIPREFAB, onLoadFinishCallBack);
+            LoaderManager.LoadUISync(path, onLoadFinishCallBack);
         }
 
         int a = 0;
@@ -59,9 +59,6 @@ public class LuaHelperManager
     public void LoadLevel(string sceneName)
     {
         Debug.Log("加载场景  " + sceneName);
-        string abPath = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/scene/game.unity3d";
-
-        //AssetBundleManager.Instance.loadscene();
         LoaderManager.LoadSceneAsync("Game", null);
     }
 }

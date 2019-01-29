@@ -125,7 +125,7 @@ public class AssetBundleLoader
 
     #region asset
 
-    public static void LoadAsset(string name, AssetType type, Action<int, UnityEngine.Object> onLoadFinishCallBack)
+    public static void LoadAsset(string name, AssetType type, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
         CheckInit();
 
@@ -149,7 +149,7 @@ public class AssetBundleLoader
         CoroutineManager.Instance.StartCoroutine(LoadAssetByCoroutine(bundlePath, name, onLoadFinishCallBack));
     }
 
-    private static IEnumerator LoadAssetByCoroutine(string bundlePath, string name, Action<int, UnityEngine.Object> onLoadFinishCallBack)
+    private static IEnumerator LoadAssetByCoroutine(string bundlePath, string name, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
         //todo 这里应该继续加载所有依赖项
         string[] dependencies = manifest.GetAllDependencies(bundlePath);
@@ -161,14 +161,14 @@ public class AssetBundleLoader
         if (req == null)
         {
             Debug.LogError("加载  " + bundlePath + "  失败----");
-            onLoadFinishCallBack.Invoke((int)LocalCode.LOAD_SCENE_ERROR, null);
+            onLoadFinishCallBack.Invoke(null);
         }
         else
         {
             AssetBundle ab = req.assetBundle;
             UnityEngine.GameObject o = ab.LoadAsset<GameObject>(name);
             ab.Unload(false);
-            onLoadFinishCallBack.Invoke((int)LocalCode.SUCCESS, o);
+            onLoadFinishCallBack.Invoke(o);
         }
     }
 

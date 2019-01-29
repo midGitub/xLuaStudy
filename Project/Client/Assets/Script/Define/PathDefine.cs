@@ -6,6 +6,21 @@ using UnityEngine;
 /// </summary>
 public class PathDefine
 {
+    #region resources
+
+    public static string resourcesRoot()
+    {
+        return "Assets/Resources/";
+    }
+
+    public static string resourcesView()
+    {
+        return resourcesRoot() + "Prefab/View/";
+    }
+
+    #endregion
+
+
     #region local
 
     /// <summary>

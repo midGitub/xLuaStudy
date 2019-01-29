@@ -43,5 +43,26 @@ public class ResourcesLoader
             onLoadFinishCallBack.Invoke(dict);
         }
     }
+
+    public static void LoadAsset(string name, AssetType type, Action<UnityEngine.Object> onLoadFinishCallBack)
+    {
+        string path = string.Empty;
+        if (type == AssetType.UIPREFAB)
+        {
+            path = "Prefab/View/" + name ;
+        }
+
+        CoroutineManager.Instance.StartCoroutine(LoadAssetByCoroutine(path, onLoadFinishCallBack));
+    }
+
+    private static IEnumerator LoadAssetByCoroutine(string path, Action<UnityEngine.Object> onLoadFinishCallBack)
+    {
+        ResourceRequest rr = Resources.LoadAsync(path);
+        yield return rr;
+        if (rr.isDone)
+        {
+            onLoadFinishCallBack.Invoke(rr.asset);
+        }
+    }
 }
 
