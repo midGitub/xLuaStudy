@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public class LoaderManager : SingletonBehaviour<LoaderManager>
 {
@@ -243,5 +244,14 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
     public static void LoadTextureSync(string name, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
         LoadAssetSync(name, AssetType.Texture, onLoadFinishCallBack);
+    }
+
+    /// <summary>
+    /// 读取图集
+    /// </summary>
+    public static void LoadAllAtlasSync(Action<int, int> onLoadSingleFinishCallBack, Action<Dictionary<string, SpriteAtlas>> onLoadAllFinishCallBack)
+    {
+        LoadSpriteAtlasRequest req = new LoadSpriteAtlasRequest(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
+        waitingLoadQueue[(int)Priority.ATLAS].List.AddLast(req);
     }
 }

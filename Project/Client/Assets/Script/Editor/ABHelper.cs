@@ -100,6 +100,7 @@ public static class ABHelper
         SetViewPrefabName();
         SetSceneName();
         SetLuaBundleName();
+        SetSpriteAtlasName();
     }
 
     public static void SetViewPrefabName()
@@ -274,6 +275,37 @@ public static class ABHelper
             else
             {
                 Debug.LogError("can't not set AssetBundleName  -----   " + outputBytePathList[i]);
+            }
+        }
+
+        EditorUtility.ClearProgressBar();
+        AssetDatabase.Refresh();
+    }
+
+    /// <summary>
+    /// 设置图集ABName
+    /// </summary>
+    public static void SetSpriteAtlasName()
+    {
+        string atlasPath = "Assets/SpriteAtlas/SpriteAtlas";
+        string[] atlasPaths = Directory.GetFiles(atlasPath, "*.spriteatlas", SearchOption.AllDirectories);
+
+        for (int i = 0; i < atlasPaths.Length; i++)
+        {
+            string[] split = atlasPaths[i].Replace('\\', '/').Split('/');
+            string bundleName = split[split.Length - 1].Replace(".SpriteAtlas", ".unity3d");
+            AssetImporter importer = AssetImporter.GetAtPath(atlasPaths[i]);
+            if (importer != null)
+            {
+                if (importer.assetBundleName != bundleName)
+                {
+                    importer.assetBundleName = "SpriteAtlas/" + bundleName;
+                }
+            }
+            else
+            {
+                Debug.LogError("SpriteAtlasName {0} load importer failed:" + atlasPaths[i]);
+                return;
             }
         }
 

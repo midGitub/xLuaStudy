@@ -16,17 +16,22 @@
 	]},
 	{"name":"view/uistartview.prefab.unity3d",
 	"info":[
-		{"version":0,
-		"size":6541}
+		{"version":2,
+		"size":801096}
 	]},
 	{"name":"AssetsBundle",
 	"info":[
 		{"version":2,
-		"size":1133}
+		"size":1173}
 	]},
 	{"name":"scene/game.unity3d",
 	"info":[
 		{"version":2,
 		"size":64537}
+	]},
+	{"name":"spriteatlas/testspriteatlas.spriteatlas",
+	"info":[
+		{"version":2,
+		"size":3029}
 	]}
 ]

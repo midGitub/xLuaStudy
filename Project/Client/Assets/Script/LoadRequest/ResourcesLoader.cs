@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.U2D;
 
 public class ResourcesLoader
 {
@@ -44,12 +45,26 @@ public class ResourcesLoader
         }
     }
 
+    public static void LoadSpriteAtlas(string path, Action<Dictionary<string, SpriteAtlas>> onLoadFinishCallBack)
+    {
+        Dictionary<string, SpriteAtlas> dict = new Dictionary<string, SpriteAtlas>();
+
+        SpriteAtlas sa = Helper.Deserialize(Helper.LoadFileData(path)) as SpriteAtlas;
+        string[] split = path.Replace('\\', '/').Split('/');
+        string name = split[split.Length - 1].Replace(".spriteatlas", "").ToLower();
+        dict.Add(name, sa);
+        if (onLoadFinishCallBack != null)
+        {
+            onLoadFinishCallBack.Invoke(dict);
+        }
+    }
+
     public static void LoadAsset(string name, AssetType type, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
         string path = string.Empty;
         if (type == AssetType.UIPREFAB)
         {
-            path = "Prefab/View/" + name ;
+            path = "Prefab/View/" + name;
         }
 
         CoroutineManager.Instance.StartCoroutine(LoadAssetByCoroutine(path, onLoadFinishCallBack));

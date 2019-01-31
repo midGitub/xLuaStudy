@@ -34,23 +34,24 @@ public class LuaHelperManager
     /// <param name="OnCreate"> 创建出来的委托回调 </param>
     public void LoadUI(string path, XLuaCustomExport.OnCreate OnCreate)
     {
+        Action<UnityEngine.Object> onLoadFinishCallBack = (p) =>
+        {
+            GameObject obj = GameObject.Instantiate(p) as GameObject;
+            obj.transform.SetParent(Canvas.transform, false);
+           // obj.SetActive(false);
+            if (OnCreate != null)
+            {
+                obj.AddComponent<LuaViewBehaviour>();
+                OnCreate(obj);
+            }
+        };
+
+        LoaderManager.LoadUISync(path, onLoadFinishCallBack);
+
         for (int k = 0; k < 10000; k++)
         {
             int kk = k;
-            Action<UnityEngine.Object> onLoadFinishCallBack = (p) =>
-            {
-                GameObject obj = GameObject.Instantiate(p) as GameObject;
-                obj.transform.SetParent(Canvas.transform, false);
-                obj.name = kk.ToString();
-                obj.SetActive(false);
-                if (OnCreate != null)
-                {
-                    obj.AddComponent<LuaViewBehaviour>();
-                    OnCreate(obj);
-                }
-            };
-
-            LoaderManager.LoadUISync(path, onLoadFinishCallBack);
+           
         }
 
         int a = 0;

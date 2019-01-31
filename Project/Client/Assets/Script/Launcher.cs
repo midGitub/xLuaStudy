@@ -45,6 +45,7 @@ public class Launcher : MonoBehaviour
     public void Init()
     {
         LoaderManager.Instance.Init();
+        AtlasManager.Instance.Init();
         LuaManager.Instance.Init();
     }
 }

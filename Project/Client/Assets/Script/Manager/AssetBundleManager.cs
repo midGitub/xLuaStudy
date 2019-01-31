@@ -78,8 +78,7 @@ public class AssetBundleManager : SingletonBehaviour<AssetBundleManager>
         AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(abPath,0);
         yield return abcr.assetBundle;
         AssetBundle ab = abcr.assetBundle;
-
-
+        
         AsyncOperation ao = SceneManager.LoadSceneAsync("Game", LoadSceneMode.Single);
     }
 }

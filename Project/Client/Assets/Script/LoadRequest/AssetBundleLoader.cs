@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.U2D;
 
 public class AssetBundleLoader
 {
@@ -121,6 +122,41 @@ public class AssetBundleLoader
         UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
     }
 
+    public static void LoadSpriteAtlas(string path, Action<Dictionary<string, SpriteAtlas>> onLoadFinishCallBack)
+    {
+        Action<UnityWebRequest> DownloadCB = (request) =>
+        {
+            if (request.isHttpError || request.isNetworkError)
+            {
+                Debug.LogError("解压失败  ---- " + request.error + "  " + request.url);
+            }
+            else
+            {
+                Dictionary<string, SpriteAtlas> curABLuaDict = new Dictionary<string, SpriteAtlas>();
+                AssetBundle Bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+                System.Object[] objectList = Bundle.LoadAllAssets();
+                string[] allAssetNames = Bundle.GetAllAssetNames();
+
+                for (int j = 0; j < objectList.Length; j++)
+                {
+                    SpriteAtlas sa = objectList[j] as SpriteAtlas;
+
+                    string fileName = allAssetNames[j].Replace("assets/spriteatlas/spriteatlas/", "").Replace(".spriteatlas", "");
+                    string[] split = fileName.Split('/');
+
+                    curABLuaDict.Add(split[0], sa);
+                }
+
+                if (onLoadFinishCallBack != null)
+                {
+                    onLoadFinishCallBack.Invoke(curABLuaDict);
+                }
+            }
+        };
+
+        UnityWebRequestManager.Instance.DownloadBuffer(path, DownloadCB);
+    }
+
     #endregion
 
     #region asset
@@ -156,6 +192,7 @@ public class AssetBundleLoader
 
         string assetURL = PathDefine.GetAssetUrl(bundlePath);
         var req = AssetBundle.LoadFromFileAsync(assetURL);
+
         yield return req;
 
         if (req == null)

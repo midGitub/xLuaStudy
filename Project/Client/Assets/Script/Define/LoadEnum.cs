@@ -3,6 +3,7 @@
 /// </summary>
 public enum Priority
 {
+    ATLAS,
     CODE,
     SCENE,
     ASSET,
