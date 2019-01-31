@@ -44,8 +44,11 @@ public class Launcher : MonoBehaviour
 
     public void Init()
     {
-        LoaderManager.Instance.Init();
-        AtlasManager.Instance.Init();
-        LuaManager.Instance.Init();
+        System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[3];
+        tasks[0] = (cb) => { LoaderManager.Instance.Init(cb); };
+        tasks[1] = (cb) => { AtlasManager.Instance.Init(cb); };
+        tasks[2] = (cb) => { LuaManager.Instance.Init(cb); };
+        AsyncHelper asyncHelper = new AsyncHelper();
+        asyncHelper.Waterfall(tasks, null);
     }
 }

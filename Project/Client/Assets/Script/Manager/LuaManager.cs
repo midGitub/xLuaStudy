@@ -13,9 +13,13 @@ public class LuaManager : SingletonBehaviour<LuaManager>
 
     private Dictionary<string, byte[]> allLuaDict = new Dictionary<string, byte[]>();
 
-    public void Init()
+    public void Init(Action<int> initedCallBack)
     {
         LoadAllLuaAssetsBundle();
+        if (initedCallBack != null)
+        {
+            initedCallBack.Invoke((int)LocalCode.SUCCESS);
+        }
     }
 
     private void InitLuaEnv()

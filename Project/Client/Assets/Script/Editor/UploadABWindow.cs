@@ -14,7 +14,7 @@ public class UploadABWindow : EditorWindow
     private int version = 0;
     private int platform = 0;
     private bool isNewPackage = false;//是否全新新包
-    [MenuItem("UploadAssetsBundle/UploadABToServer", false, 10)]
+    [MenuItem("ABHelper/UploadABToServer", false, 100)]
     public static void OpenUploadAssetsBundleToServerView()
     {
         uploadABWindow = GetWindow<UploadABWindow>();

@@ -78,6 +78,11 @@ public class LoadSpriteAtlasRequest : LoadRequest
                         string path = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/" + abNameList[i];
                         AssetBundleLoader.LoadSpriteAtlas(path, dataLoadCallBack);
                     }
+
+                    if (abNameList.Count == 0)
+                    {
+                        onLoadAllFinishCallBack.Invoke(allSpriteAtlasDict);
+                    }
                 };
 
                 LoadLocalVersionJsonObject(loadVersionJsonCallBack);

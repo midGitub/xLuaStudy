@@ -23,7 +23,7 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
     public static ulong curFrameCount = 0;
 
     private int curHitCount = 0;
-    public void Init()
+    public void Init(Action<int> initedCB)
     {
         //初始化加载队列
         waitingLoadQueue = new LinkedListNode<LoadRequest>[(int)Priority.PRIORITY_COUNT];
@@ -41,6 +41,11 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
         cacheFlagDict = new Dictionary<AssetType, bool>();
         cacheFlagDict[AssetType.UIPREFAB] = true;
         cacheFlagDict[AssetType.Texture] = true;
+
+        if (initedCB != null)
+        {
+            initedCB.Invoke((int)LocalCode.SUCCESS);
+        }
     }
 
     private void Update()
