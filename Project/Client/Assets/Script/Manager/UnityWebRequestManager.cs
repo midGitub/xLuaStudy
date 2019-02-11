@@ -222,8 +222,10 @@ public class UnityWebRequestManager : SingletonBehaviour<UnityWebRequestManager>
         {
             actionResult(bundle);
         }
+
+        bundle.Unload(false);
     }
-    
+
     /// <summary>
     /// 请求服务器地址上的音效
     /// </summary>

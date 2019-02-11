@@ -259,4 +259,9 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
         LoadSpriteAtlasRequest req = new LoadSpriteAtlasRequest(onLoadSingleFinishCallBack, onLoadAllFinishCallBack);
         waitingLoadQueue[(int)Priority.ATLAS].List.AddLast(req);
     }
+
+    public void OnDestroy()
+    {
+        AssetBundleLoader.abList.Clear();
+    }
 }

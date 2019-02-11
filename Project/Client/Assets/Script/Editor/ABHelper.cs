@@ -11,6 +11,7 @@ public static class ABHelper
     [MenuItem("ABHelper/BuildAssetBundleEditor", false, 0)]
     public static void BuildAssetBundleEditor()
     {
+        AssetBundle.UnloadAllAssetBundles(true);
         SetBundleNameAll();
         string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPathByPF("Editor") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
@@ -56,6 +57,7 @@ public static class ABHelper
     [MenuItem("ABHelper/BuildAssetBundleAndroid", false, 1)]
     public static void BuildAssetBundleLocalAndroid()
     {
+        
         SetBundleNameAll();
         string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPath("Android") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
@@ -101,6 +103,8 @@ public static class ABHelper
         SetSceneName();
         SetLuaBundleName();
         SetSpriteAtlasName();
+
+        AssetBundle.UnloadAllAssetBundles(true);
     }
 
     public static void SetViewPrefabName()
@@ -308,7 +312,7 @@ public static class ABHelper
                 return;
             }
         }
-
+        
         EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
     }

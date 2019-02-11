@@ -75,10 +75,11 @@ public class AssetBundleManager : SingletonBehaviour<AssetBundleManager>
     IEnumerator load()
     {
         string abPath = PathDefine.StreamingAssetsPathByPF(Helper.GetPlatformString()) + "AssetsBundle/scene/game.unity3d";
-        AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(abPath,0);
+        AssetBundleCreateRequest abcr = AssetBundle.LoadFromFileAsync(abPath, 0);
         yield return abcr.assetBundle;
         AssetBundle ab = abcr.assetBundle;
-        
+
         AsyncOperation ao = SceneManager.LoadSceneAsync("Game", LoadSceneMode.Single);
+        ab.Unload(false);
     }
 }

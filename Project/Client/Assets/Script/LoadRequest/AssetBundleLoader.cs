@@ -10,7 +10,7 @@ public class AssetBundleLoader
 {
     private static AssetBundleManifest manifest;
 
-
+    public static List<AssetBundle> abList = new List<AssetBundle>();
     private static void CheckInit()
     {
         if (manifest != null)
@@ -75,10 +75,8 @@ public class AssetBundleLoader
         {
             onLoadFinishCallBack.Invoke((int)LocalCode.SUCCESS);
         }
-        else
-        {
-            onLoadFinishCallBack.Invoke((int)LocalCode.LOAD_SCENE_ERROR);
-        }
+
+        req.assetBundle.Unload(false);
     }
 
     #endregion
@@ -99,9 +97,9 @@ public class AssetBundleLoader
             else
             {
                 Dictionary<string, byte[]> curABLuaDict = new Dictionary<string, byte[]>();
-                AssetBundle Bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
-                System.Object[] objectList = Bundle.LoadAllAssets();
-                string[] allAssetNames = Bundle.GetAllAssetNames();
+                AssetBundle bundle = AssetBundle.LoadFromMemory(request.downloadHandler.data);
+                System.Object[] objectList = bundle.LoadAllAssets();
+                string[] allAssetNames = bundle.GetAllAssetNames();
                 for (int j = 0; j < objectList.Length; j++)
                 {
                     byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(objectList[j].ToString());
@@ -116,6 +114,8 @@ public class AssetBundleLoader
                 {
                     onLoadFinishCallBack.Invoke(curABLuaDict);
                 }
+
+                abList.Add(bundle);
             }
         };
 
@@ -151,6 +151,10 @@ public class AssetBundleLoader
                 {
                     onLoadFinishCallBack.Invoke(curABLuaDict);
                 }
+
+                objectList = null;
+                curABLuaDict.Clear();
+                abList.Add(Bundle);
             }
         };
 
@@ -204,8 +208,9 @@ public class AssetBundleLoader
         {
             AssetBundle ab = req.assetBundle;
             UnityEngine.GameObject o = ab.LoadAsset<GameObject>(name);
-            ab.Unload(false);
+
             onLoadFinishCallBack.Invoke(o);
+            abList.Add(req.assetBundle);
         }
     }
 

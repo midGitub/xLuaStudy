@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using XLua;
 
 //Lua中调用该C#脚本  运行前XLua  Generate Code 运行一下
@@ -34,27 +35,26 @@ public class LuaHelperManager
     /// <param name="OnCreate"> 创建出来的委托回调 </param>
     public void LoadUI(string path, XLuaCustomExport.OnCreate OnCreate)
     {
+        // for (int k = 0; k < 100; k++)
+        //{
+        // int kk = k;
         Action<UnityEngine.Object> onLoadFinishCallBack = (p) =>
         {
             GameObject obj = GameObject.Instantiate(p) as GameObject;
             obj.transform.SetParent(Canvas.transform, false);
-           // obj.SetActive(false);
+                // obj.SetActive(false);
+               // obj.name = kk.ToString();
             if (OnCreate != null)
             {
                 obj.AddComponent<LuaViewBehaviour>();
                 OnCreate(obj);
             }
+
         };
-
         LoaderManager.LoadUISync(path, onLoadFinishCallBack);
+        // }
 
-        for (int k = 0; k < 10000; k++)
-        {
-            int kk = k;
-           
-        }
-
-        int a = 0;
+        // int a = 0;
     }
 
     public void LoadLevel(string sceneName)

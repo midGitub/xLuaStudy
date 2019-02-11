@@ -40,4 +40,5 @@ public class AtlasManager : SingletonBehaviour<AtlasManager>
     {
         callback(atlasDict[tag.ToLower()]);
     }
+    
 }

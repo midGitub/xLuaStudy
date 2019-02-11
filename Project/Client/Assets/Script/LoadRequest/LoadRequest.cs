@@ -7,5 +7,6 @@ public class LoadRequest
         process = false;
         return false;
     }
+    
 }
 
