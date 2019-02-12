@@ -104,8 +104,15 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
                     if (curHitCount < GameSetting.Instance.MaxhitThresholdObject && Time.realtimeSinceStartup - nowTime <= GameSetting.Instance.frameTimeLimitObject)
                     {
                         curHitCount++;
-                        curABC.onLoadFinishCallBackList[j].Invoke(curABC.obj);
-                        deleteActionList.Add(curABC.onLoadFinishCallBackList[j]);
+                        try
+                        {
+                            curABC.onLoadFinishCallBackList[j].Invoke(curABC.obj);
+                            deleteActionList.Add(curABC.onLoadFinishCallBackList[j]);
+                        }
+                        catch
+                        {
+                            throw;
+                        }
                     }
                     else
                     {

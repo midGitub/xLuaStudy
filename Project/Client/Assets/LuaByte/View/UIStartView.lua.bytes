@@ -1,6 +1,5 @@
 UIStartView = {}
 local this = UIStartView
-local a
 local transform
 local gameObject
 function UIStartView.Awake(obj)
@@ -30,5 +29,5 @@ end
 
 function UIStartView.OnStartButtonClick()
     print("OnStartButtonClick()")
-    CS.LuaHelperManager.Instance:LoadLevel("Game")
+    --CS.LuaHelperManager.Instance:LoadLevel("Game")
 end

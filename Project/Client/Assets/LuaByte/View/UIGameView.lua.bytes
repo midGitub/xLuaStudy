@@ -1,0 +1,24 @@
+UIGameView = {}
+local this = UIGameView
+local transform
+local gameObject
+function UIGameView.Awake(obj)
+    gameObject = obj
+    transform = obj.transform
+    this.Init()
+end
+
+function UIGameView.Init()
+    print("初始化UIGameView")
+    
+end
+
+function UIUIGameView.Start()
+end
+
+function UIUIGameView.Update()
+end
+
+function UIUIGameView.OnDestroy()
+
+end

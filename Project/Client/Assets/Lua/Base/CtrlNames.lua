@@ -1,3 +1,0 @@
-CtrlNames = {
-    UIStartCtrl = "UIStartCtrl"
-}

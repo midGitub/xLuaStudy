@@ -385,7 +385,7 @@ public class Helper
             }
             catch (Exception ex)
             {
-                Debug.LogError("删除文件夹出错 ---" + ex);
+                UnityEngine.Debug.LogError("删除文件夹出错 ---" + ex);
             }
         }
         //递归删除子文件夹内文件
@@ -506,6 +506,25 @@ public class Helper
         }
 
         return managerGroup;
+    }
+
+    public static void OpenBat(string path)
+    {
+        System.Diagnostics.Process proc = null;
+        try
+        {
+            proc = new System.Diagnostics.Process();
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.FileName = path;
+            proc.StartInfo.Arguments = string.Format("10");//this is argument
+            proc.Start();
+            proc.WaitForExit();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception Occurred :{0},{1}", ex.Message, ex.StackTrace.ToString());
+        }
     }
 }
 

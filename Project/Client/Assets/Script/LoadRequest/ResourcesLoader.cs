@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.U2D;
@@ -49,7 +50,10 @@ public class ResourcesLoader
     {
         Dictionary<string, SpriteAtlas> dict = new Dictionary<string, SpriteAtlas>();
 
-        SpriteAtlas sa = Helper.Deserialize(Helper.LoadFileData(path)) as SpriteAtlas;
+       // byte[] byteArray = Helper.LoadFileData(path);
+       //// object @object = Helper.Deserialize(byteArray);
+        SpriteAtlas sa=  AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
+        //SpriteAtlas sa = @object as SpriteAtlas;
         string[] split = path.Replace('\\', '/').Split('/');
         string name = split[split.Length - 1].Replace(".spriteatlas", "").ToLower();
         dict.Add(name, sa);

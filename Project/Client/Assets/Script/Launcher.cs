@@ -44,12 +44,24 @@ public class Launcher : MonoBehaviour
 
     public void Init()
     {
+        Action<int> finishCallBack = (code) =>
+        {
+            if (code == (int)LocalCode.SUCCESS)
+            {
+                UILoadingView.Instance.gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogError("初始化失败");
+            }
+        };
+
         System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[3];
         tasks[0] = (cb) => { LoaderManager.Instance.Init(cb); };
         tasks[1] = (cb) => { AtlasManager.Instance.Init(cb); };
         tasks[2] = (cb) => { LuaManager.Instance.Init(cb); };
         AsyncHelper asyncHelper = new AsyncHelper();
-        asyncHelper.Waterfall(tasks, null);
+        asyncHelper.Waterfall(tasks, finishCallBack);
     }
-    
+
 }

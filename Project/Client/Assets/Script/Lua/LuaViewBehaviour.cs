@@ -21,14 +21,12 @@ public class LuaViewBehaviour : MonoBehaviour
     public delegate void delLuaOnDestroy();
     delLuaOnDestroy luaOnDestroy;
 
-
-
     private LuaTable scriptEnv;
     private LuaEnv luaEnv;
 
-
     private void Awake()
     {
+        Debug.LogError("awake");
         //获取全局的Lua环境变量
         luaEnv = LuaManager.luaEnv;
 
@@ -47,13 +45,14 @@ public class LuaViewBehaviour : MonoBehaviour
         }
 
         prefabName = prefabName.Replace("pan_", "");
+        name = prefabName;
 
         //  prefabName + ".awake"  要对应Lua脚本中View的方法
         luaAwake = scriptEnv.GetInPath<LuaViewBehaviour.delLuaAwake>(prefabName + ".Awake");
         luaStart = scriptEnv.GetInPath<LuaViewBehaviour.delLuaStart>(prefabName + ".Start");
         luaUpdate = scriptEnv.GetInPath<LuaViewBehaviour.delLuaUpdate>(prefabName + ".Update");
         luaOnDestroy = scriptEnv.GetInPath<LuaViewBehaviour.delLuaOnDestroy>(prefabName + ".OnDestroy");
-        
+
         scriptEnv.Set("self", this);
         if (luaAwake != null)
         {
@@ -90,5 +89,10 @@ public class LuaViewBehaviour : MonoBehaviour
         luaOnDestroy = null;
         luaUpdate = null;
         luaStart = null;
+    }
+
+    public LuaTable GetLuaTable()
+    {
+        return scriptEnv.GetInPath<LuaTable>(name);
     }
 }

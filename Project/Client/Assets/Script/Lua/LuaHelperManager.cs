@@ -33,28 +33,20 @@ public class LuaHelperManager
     /// </summary>
     /// <param name="path"> 路径 </param>
     /// <param name="OnCreate"> 创建出来的委托回调 </param>
-    public void LoadUI(string path, XLuaCustomExport.OnCreate OnCreate)
+    public void LoadUI(string name, Action<string, GameObject,LuaTable> OnCreate)
     {
-        // for (int k = 0; k < 100; k++)
-        //{
-        // int kk = k;
         Action<UnityEngine.Object> onLoadFinishCallBack = (p) =>
         {
             GameObject obj = GameObject.Instantiate(p) as GameObject;
             obj.transform.SetParent(Canvas.transform, false);
-                // obj.SetActive(false);
-               // obj.name = kk.ToString();
             if (OnCreate != null)
             {
-                obj.AddComponent<LuaViewBehaviour>();
-                OnCreate(obj);
+                LuaViewBehaviour luaViewBehaviour = obj.AddComponent<LuaViewBehaviour>();
+                OnCreate(name, obj, luaViewBehaviour.GetLuaTable());
             }
-
         };
-        LoaderManager.LoadUISync(path, onLoadFinishCallBack);
-        // }
 
-        // int a = 0;
+        LoaderManager.LoadUISync(name, onLoadFinishCallBack);
     }
 
     public void LoadLevel(string sceneName)

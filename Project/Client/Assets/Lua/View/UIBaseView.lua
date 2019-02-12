@@ -1,8 +1,7 @@
-UIBaseView = BaseClass()
+UIBaseView = UIBaseView or BaseClass()
 
-function UIBaseView:Init()
-    self:Refresh()
-end
+UIBaseView.c = 7
 
-function UIBaseView:Refresh()
+function UIBaseView:__init()
+    print("uibaseview   init")
 end

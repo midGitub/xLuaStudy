@@ -1,0 +1,16 @@
+local this = UIManager
+
+local viewList = {}
+
+function UIManager.LoadUi(name)
+    CS.LuaHelperManager.Instance:LoadUI(name, this.OnCreate)
+end
+
+function UIManager.OnCreate(name, go)
+    viewList[name] = go
+end
+
+function UIManager.FindUiByName(name)
+    return viewList[name]
+end
+
