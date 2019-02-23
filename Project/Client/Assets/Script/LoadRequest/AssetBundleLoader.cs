@@ -10,7 +10,8 @@ public class AssetBundleLoader
 {
     private static AssetBundleManifest manifest;
 
-    public static List<AssetBundle> abList = new List<AssetBundle>();
+    public static Dictionary<string, AssetBundle> abDict = new Dictionary<string, AssetBundle>();
+    public static Dictionary<string, GameObject> gameObjectPool = new Dictionary<string, GameObject>();
     private static void CheckInit()
     {
         if (manifest != null)
@@ -115,7 +116,7 @@ public class AssetBundleLoader
                     onLoadFinishCallBack.Invoke(curABLuaDict);
                 }
 
-                abList.Add(bundle);
+                abDict.Add(path, bundle);
             }
         };
 
@@ -154,7 +155,7 @@ public class AssetBundleLoader
 
                 objectList = null;
                 curABLuaDict.Clear();
-                abList.Add(Bundle);
+                abDict.Add(path, Bundle);
             }
         };
 
@@ -184,6 +185,14 @@ public class AssetBundleLoader
                     break;
                 }
             }
+            else if (type == AssetType.TEXTURE)
+            {
+                if (allBundleList[i].Contains("texture/") && allBundleList[i].Contains(name.ToLower()))
+                {
+                    bundlePath = allBundleList[i];
+                    break;
+                }
+            }
         }
 
         CoroutineManager.Instance.StartCoroutine(LoadAssetByCoroutine(bundlePath, name, onLoadFinishCallBack));
@@ -191,26 +200,68 @@ public class AssetBundleLoader
 
     private static IEnumerator LoadAssetByCoroutine(string bundlePath, string name, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
-        //todo 这里应该继续加载所有依赖项
-        string[] dependencies = manifest.GetAllDependencies(bundlePath);
-
         string assetURL = PathDefine.GetAssetUrl(bundlePath);
-        var req = AssetBundle.LoadFromFileAsync(assetURL);
 
-        yield return req;
+        AssetBundle ab = null;
 
-        if (req == null)
+        AssetBundleCreateRequest req = null;
+        if (abDict.ContainsKey(bundlePath))
+        {
+            ab = abDict[bundlePath];
+        }
+        else
+        {
+            Debug.LogError("assetURL  " + assetURL);
+            req = AssetBundle.LoadFromFileAsync(assetURL);
+            ab = req.assetBundle;
+            abDict.Add(bundlePath, ab);
+        }
+
+        yield return ab;
+
+        if (ab == null)
         {
             Debug.LogError("加载  " + bundlePath + "  失败----");
             onLoadFinishCallBack.Invoke(null);
         }
         else
         {
-            AssetBundle ab = req.assetBundle;
-            UnityEngine.GameObject o = ab.LoadAsset<GameObject>(name);
+            UnityEngine.GameObject o = null;
+            if (gameObjectPool.ContainsKey(name))
+            {
+                o = gameObjectPool[name];
+            }
+            else
+            {
+                o = ab.LoadAsset<GameObject>(name);
+                gameObjectPool.Add(name, o);
+            }
 
-            onLoadFinishCallBack.Invoke(o);
-            abList.Add(req.assetBundle);
+            //这里应该继续加载所有依赖项
+            string[] dependencies = manifest.GetAllDependencies(bundlePath);
+            List<AssetBundle> abList = new List<AssetBundle>();
+            if (dependencies.Length > 0)
+            {
+                for (int i = 0; i < dependencies.Length; i++)
+                {
+                    int index = i;
+
+                    string depPath = PathDefine.GetAssetUrl(dependencies[i]);
+                    var de = AssetBundle.LoadFromFileAsync(depPath);
+                    yield return de;
+                    abList.Add(de.assetBundle);
+                }
+                onLoadFinishCallBack.Invoke(o);
+
+                for (int i = 0; i < abList.Count; i++)
+                {
+                    abList[i].Unload(false);
+                }
+            }
+            else
+            {
+                onLoadFinishCallBack.Invoke(o);
+            }
         }
     }
 

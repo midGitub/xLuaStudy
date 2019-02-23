@@ -12,5 +12,5 @@ end
 function GameManager.Init()
     this.InitViews()
 
-    UIManager.LoadUI("UIStartView")
+    UIManager.LoadUi("UIStartView")
 end

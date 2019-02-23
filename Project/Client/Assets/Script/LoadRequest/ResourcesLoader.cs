@@ -50,10 +50,11 @@ public class ResourcesLoader
     {
         Dictionary<string, SpriteAtlas> dict = new Dictionary<string, SpriteAtlas>();
 
-       // byte[] byteArray = Helper.LoadFileData(path);
-       //// object @object = Helper.Deserialize(byteArray);
-        SpriteAtlas sa=  AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
-        //SpriteAtlas sa = @object as SpriteAtlas;
+        Debug.LogError(path);
+        SpriteAtlas sa = null;
+#if UNITY_EDITOR
+        sa = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
+#endif
         string[] split = path.Replace('\\', '/').Split('/');
         string name = split[split.Length - 1].Replace(".spriteatlas", "").ToLower();
         dict.Add(name, sa);

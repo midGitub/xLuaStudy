@@ -56,6 +56,10 @@ public class Launcher : MonoBehaviour
             }
         };
 
+        LoaderManager.Instance.Init(finishCallBack);
+
+        GameObject canvas = GameObject.Find("Canvas");
+
         System.Action<System.Action<int>>[] tasks = new System.Action<System.Action<int>>[3];
         tasks[0] = (cb) => { LoaderManager.Instance.Init(cb); };
         tasks[1] = (cb) => { AtlasManager.Instance.Init(cb); };

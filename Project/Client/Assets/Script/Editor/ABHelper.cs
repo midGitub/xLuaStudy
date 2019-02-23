@@ -57,7 +57,7 @@ public static class ABHelper
     [MenuItem("ABHelper/BuildAssetBundleAndroid", false, 1)]
     public static void BuildAssetBundleLocalAndroid()
     {
-        
+
         SetBundleNameAll();
         string dir = Helper.CheckPathExistence(PathDefine.StreamingAssetsPath("Android") + "AssetsBundle/");
         if (Directory.Exists(dir) == false)
@@ -312,9 +312,46 @@ public static class ABHelper
                 return;
             }
         }
-        
+
         EditorUtility.ClearProgressBar();
         AssetDatabase.Refresh();
+    }
+
+    [MenuItem("ABHelper/setTextureName", false, 100)]
+    public static void SetTextureName()
+    {
+        string texturePath = "Assets/Resources/Texture";
+        string[] texturePaths = Directory.GetFiles(texturePath);
+
+        List<string> texturePathList = new List<string>();
+        for (int i = 0; i < texturePaths.Length; i++)
+        {
+            if (!texturePaths[i].Contains(".meta"))
+            {
+                texturePathList.Add(texturePaths[i]);
+            }
+        }
+
+        for (int i = 0; i < texturePathList.Count; i++)
+        {
+            string[] split1 = texturePathList[i].Replace('\\', '/').Split('/');
+            string[] split2 = split1[split1.Length - 1].Split('.');
+            split2[split2.Length - 1] = ".unity3d";
+            string bundleName = split2[0] + split2[1];
+            AssetImporter importer = AssetImporter.GetAtPath(texturePathList[i]);
+            if (importer != null)
+            {
+                if (importer.assetBundleName != bundleName)
+                {
+                    importer.assetBundleName = "Texture/" + bundleName;
+                }
+            }
+            else
+            {
+                Debug.LogError("TextureName {0} load importer failed:" + texturePathList[i]);
+                return;
+            }
+        }
     }
 
     #endregion

@@ -10,12 +10,7 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
     /// 等待加载队列
     /// </summary>
     private static LinkedListNode<LoadRequest>[] waitingLoadQueue;
-
-    /// <summary>
-    /// 等待实例化队列
-    /// </summary>
-    private static List<LoadingCache> waitingInsList;
-
+    
     private static List<LoadingCache> cacheList;
 
     private static Dictionary<AssetType, bool> cacheFlagDict;
@@ -34,13 +29,11 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
             list.AddFirst(waitingLoadQueue[i]);
         }
 
-        waitingInsList = new List<LoadingCache>();
-
         cacheList = new List<LoadingCache>();
 
         cacheFlagDict = new Dictionary<AssetType, bool>();
         cacheFlagDict[AssetType.UIPREFAB] = true;
-        cacheFlagDict[AssetType.Texture] = true;
+        cacheFlagDict[AssetType.TEXTURE] = true;
 
         if (initedCB != null)
         {
@@ -88,58 +81,6 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
                 }
             }
         }
-
-        //实例化Object
-        nowTime = Time.realtimeSinceStartup;
-        curHitCount = 0;
-        List<LoadingCache> deleteABCList = new List<LoadingCache>();
-        for (int i = 0; i < waitingInsList.Count; i++)
-        {
-            if (curHitCount < GameSetting.Instance.MaxhitThresholdObject && Time.realtimeSinceStartup - nowTime <= GameSetting.Instance.frameTimeLimitObject)
-            {
-                LoadingCache curABC = waitingInsList[i];
-                List<Action<UnityEngine.Object>> deleteActionList = new List<Action<UnityEngine.Object>>();
-                for (int j = 0; j < curABC.onLoadFinishCallBackList.Count; j++)
-                {
-                    if (curHitCount < GameSetting.Instance.MaxhitThresholdObject && Time.realtimeSinceStartup - nowTime <= GameSetting.Instance.frameTimeLimitObject)
-                    {
-                        curHitCount++;
-                        try
-                        {
-                            curABC.onLoadFinishCallBackList[j].Invoke(curABC.obj);
-                            deleteActionList.Add(curABC.onLoadFinishCallBackList[j]);
-                        }
-                        catch
-                        {
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                for (int j = 0; j < deleteActionList.Count; j++)
-                {
-                    curABC.onLoadFinishCallBackList.Remove(deleteActionList[j]);
-                }
-
-                if (curABC.onLoadFinishCallBackList.Count == 0)
-                {
-                    deleteABCList.Add(curABC);
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        for (int i = 0; i < deleteABCList.Count; i++)
-        {
-            waitingInsList.Remove(deleteABCList[i]);
-        }
     }
 
     private static LinkedListNode<LoadRequest> removeQNode(LinkedListNode<LoadRequest> node)
@@ -170,77 +111,16 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
         waitingLoadQueue[(int)Priority.CODE].List.AddLast(req);
     }
 
+    /// <summary>
+    /// 异步加载资源
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="assetType"></param>
+    /// <param name="onLoadFinishCallBack"></param>
     public static void LoadAssetSync(string name, AssetType assetType, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
-        LoadingCache cache = null;
-
-        for (int i = 0; i < cacheList.Count; i++)
-        {
-            if (cacheList[i].assetType == assetType && cacheList[i].name == name)
-            {
-                cache = cacheList[i];
-                break;
-            }
-        }
-
-        if (cacheFlagDict[assetType] && cache == null)
-        {
-            cache = new LoadingCache();
-            cache.name = name;
-            cache.assetType = assetType;
-            cache.onLoadFinishCallBackList.Add(onLoadFinishCallBack);
-            cacheList.Add(cache);
-        }
-
-        Action<UnityEngine.Object> loadCallBack = (abObject) =>
-        {
-            if (cacheFlagDict[assetType])
-            {
-                cache.obj = abObject;
-                waitingInsList.Add(cache);
-            }
-            else
-            {
-                onLoadFinishCallBack.Invoke(abObject);
-            }
-        };
-
-        if (cache != null)
-        {
-            if (cache.obj == null)
-            {
-                if (cache.loadFrameCount == 0)//同帧第一次加载
-                {
-                    cache.loadFrameCount = curFrameCount;
-                    LoadAssetRequest req = new LoadAssetRequest(name, assetType, loadCallBack);
-                    waitingLoadQueue[(int)Priority.ASSET].List.AddLast(req);
-                }
-                else if (cache.loadFrameCount == curFrameCount)
-                {
-                    if (!cache.onLoadFinishCallBackList.Contains(onLoadFinishCallBack))
-                    {
-                        cache.onLoadFinishCallBackList.Add(onLoadFinishCallBack);
-                    }
-                }
-                else
-                {
-                    LoadAssetRequest req = new LoadAssetRequest(name, assetType, loadCallBack);
-                    waitingLoadQueue[(int)Priority.ASSET].List.AddLast(req);
-                }
-            }
-            else
-            {
-                onLoadFinishCallBack.Invoke(cache.obj);
-            }
-        }
-        else
-        {
-            if (cache == null || cache.obj == null)
-            {
-                LoadAssetRequest req = new LoadAssetRequest(name, assetType, loadCallBack);
-                waitingLoadQueue[(int)Priority.ASSET].List.AddLast(req);
-            }
-        }
+        LoadAssetRequest req = new LoadAssetRequest(name, assetType, onLoadFinishCallBack);
+        waitingLoadQueue[(int)Priority.ASSET].List.AddLast(req);
     }
 
     /// <summary>
@@ -255,7 +135,7 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
 
     public static void LoadTextureSync(string name, Action<UnityEngine.Object> onLoadFinishCallBack)
     {
-        LoadAssetSync(name, AssetType.Texture, onLoadFinishCallBack);
+        LoadAssetSync(name, AssetType.TEXTURE, onLoadFinishCallBack);
     }
 
     /// <summary>
@@ -269,6 +149,6 @@ public class LoaderManager : SingletonBehaviour<LoaderManager>
 
     public void OnDestroy()
     {
-        AssetBundleLoader.abList.Clear();
+        AssetBundleLoader.abDict.Clear();
     }
 }

@@ -9,8 +9,7 @@ public class LoadAssetRequest : LoadRequest
     //是否在加载状态
     private bool process = false;
     private LoadStatus loadStatus = LoadStatus.UNLOAD;
-
-    private string name;
+    
     private AssetType assetType = new AssetType();
     private Action<UnityEngine.Object> onLoadFinishCallBack;
     public LoadAssetRequest(string name, AssetType assetType, Action<UnityEngine.Object> onLoadFinishCallBack)

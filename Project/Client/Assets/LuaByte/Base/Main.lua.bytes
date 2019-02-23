@@ -1,6 +1,7 @@
-require("GameManager")
-require("BaseClass")
+
+require("RequireList")
 
 function main()
-    GameManager.Init();
+    GameManager.Init()
+    ModuleManager.New()
 end
